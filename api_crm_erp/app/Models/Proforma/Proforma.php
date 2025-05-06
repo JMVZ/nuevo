@@ -59,6 +59,11 @@ class Proforma extends Model
         date_default_timezone_set('America/Lima');
         $this->attributes['updated_at'] = Carbon::now();
     }
+    public function getFirstPayment()
+{
+    return $this->proforma_payments()->orderBy('created_at')->first();
+}
+
 
     /**
      * Relaciones
@@ -70,8 +75,9 @@ class Proforma extends Model
 
     public function client()
     {
-        return $this->belongsTo(Client::class, 'client_id');
+        return $this->belongsTo(Client::class)->withTrashed();
     }
+    
 
     public function sucursale()
     {
@@ -122,8 +128,10 @@ class Proforma extends Model
             });
         }
         if ($search_client) {
-            $query->whereHas("client", function ($q) use ($search_client) {
-                $q->where("full_name", "like", "%{$search_client}%");
+            $query->whereIn('client_id', function ($subquery) use ($search_client) {
+                $subquery->select('id')
+                    ->from('clients')
+                    ->where('full_name', 'like', "%{$search_client}%");
             });
         }
         if ($search_product) {

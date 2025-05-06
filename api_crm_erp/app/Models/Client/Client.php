@@ -20,7 +20,6 @@ class Client extends Model
     /**
      * Relaciones que se soft‐deletean en cascada
      */
-    protected $softCascade = ['proformas'];
 
     protected $fillable = [
         "name",

@@ -30,7 +30,9 @@ class CajaHistoriePayment extends Model
         return $this->belongsTo(CajaHistorie::class,"caja_historie_id");
     }
 
-    public function proforma_payment(){
-        return $this->belongsTo(ProformaPayment::class,"proforma_payment_id");
-    }
+    public function proforma_payment()
+{
+    return $this->belongsTo(\App\Models\Proforma\ProformaPayment::class)->withTrashed();
+}
+
 }

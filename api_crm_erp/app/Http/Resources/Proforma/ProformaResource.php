@@ -18,25 +18,39 @@ class ProformaResource extends JsonResource
         return [
             'id' => $this->resource->id,
             'user_id' => $this->resource->user_id,
+'asesor' => $this->resource->asesor ? [
+    'id' => $this->resource->asesor->id,
+    'full_name' => $this->resource->asesor->name . ' ' . $this->resource->asesor->surname,
+] : [
+    'id' => null,
+    'full_name' => 'Asesor eliminado',
+],
 
-            'asesor' => [
-                'id' => optional($this->resource->asesor)->id,
-                'full_name' => optional($this->resource->asesor)->name . ' ' . optional($this->resource->asesor)->surname,
-            ],
 
             'client_id' => $this->resource->client_id,
-            'client' => [
-                'id' => optional($this->resource->client)->id,
-                'full_name' => optional($this->resource->client)->full_name,
-                'client_segment' => [
-                    'id' => optional(optional($this->resource->client)->client_segment)->id,
-                    'name' => optional(optional($this->resource->client)->client_segment)->name,
-                ],
-                'phone' => optional($this->resource->client)->phone,
-                'type' => optional($this->resource->client)->type,
-                'n_document' => optional($this->resource->client)->n_document,
-                'is_parcial' => optional($this->resource->client)->is_parcial,
-            ],
+            'client' => $this->resource->client ? [
+    'id' => $this->resource->client->id,
+    'full_name' => $this->resource->client->full_name,
+    'client_segment' => [
+        'id' => optional($this->resource->client->client_segment)->id,
+        'name' => optional($this->resource->client->client_segment)->name,
+    ],
+    'phone' => $this->resource->client->phone,
+    'type' => $this->resource->client->type,
+    'n_document' => $this->resource->client->n_document,
+    'is_parcial' => $this->resource->client->is_parcial,
+] : [
+    'id' => null,
+    'full_name' => 'Cliente eliminado',
+    'client_segment' => [
+        'id' => null,
+        'name' => null,
+    ],
+    'phone' => null,
+    'type' => null,
+    'n_document' => null,
+    'is_parcial' => null,
+],
 
             'client_segment_id' => $this->resource->client_segment_id,
             'client_segment' => [
