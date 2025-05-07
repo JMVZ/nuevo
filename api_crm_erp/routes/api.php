@@ -109,8 +109,9 @@ Route::group([
     Route::get("proformas/search-clients", [ProformaController::class, 'search_clients']);
     Route::get("proformas/search-products", [ProformaController::class, 'search_products']);
     Route::get("proformas/config", [ProformaController::class, 'config']);
-    Route::post('/proformas/{id}', [ProformaController::class, 'update']);
-    Route::resource("proformas",ProformaController::class); 
+        Route::resource("proformas",ProformaController::class); Route::post('/proformas/{id}', [ProformaController::class, 'update']);
+        Route::post('/proformas/{proforma}/tomar-insumos', [ProformaController::class, 'tomarInsumos']);
+
 
     Route::resource("proforma-details",ProformaDetailController::class); 
 
@@ -134,6 +135,8 @@ Route::group([
 
         Route::resource("ingresos",CajaIngresoController::class); 
         Route::resource("egresos",CajaEgresoController::class); 
+        Route::post('/orden-consumo/tomar/{proforma_id}', [OrdenConsumoController::class, 'tomarInsumos']);
+
     });
 
     Route::post("comission",[ComissionController::class,"comission_asesor"]);

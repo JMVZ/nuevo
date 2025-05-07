@@ -20,8 +20,6 @@ export class ProformasService {
     this.isLoading$ = this.isLoadingSubject.asObservable();
   }
 
-
-
   searchClients(n_document:string,full_name:string,phone:string){
     this.isLoadingSubject.next(true);
     let LINK = "";
@@ -53,7 +51,7 @@ export class ProformasService {
       finalize(() => this.isLoadingSubject.next(false))
     );
   }
-  
+
   configAll(){
     this.isLoadingSubject.next(true);
     let URL = URL_SERVICIOS+"/proformas/config";
@@ -62,7 +60,7 @@ export class ProformasService {
       finalize(() => this.isLoadingSubject.next(false))
     );
   }
-  
+
   listProformas(page:number = 1,data:any = {}){
     this.isLoadingSubject.next(true);
     let URL = URL_SERVICIOS+"/proformas/index";
@@ -84,7 +82,6 @@ export class ProformasService {
   evalDisponibilidad(PRODUCT_ID:string,unit_id:string,quantity:number){
     this.isLoadingSubject.next(true);
     let URL = URL_SERVICIOS+"/proformas/eval-disponibilidad/"+PRODUCT_ID+"?unit_id="+unit_id+"&quantity="+quantity;
-    
     let headers = new HttpHeaders({'Authorization': 'Bearer '+this.authservice.token});
     return this.http.get(URL,{headers:headers}).pipe(
       finalize(() => this.isLoadingSubject.next(false))
@@ -107,8 +104,8 @@ export class ProformasService {
     return this.http.post(URL,data,{headers:headers}).pipe(
       finalize(() => this.isLoadingSubject.next(false))
     );
-
   }
+
   deleteProforma(PROFORMA_ID:string){
     this.isLoadingSubject.next(true);
     let URL = URL_SERVICIOS+"/proformas/"+PROFORMA_ID;
@@ -127,6 +124,7 @@ export class ProformasService {
       finalize(() => this.isLoadingSubject.next(false))
     );
   }
+
   editDetailProforma(DETAIL_ID:string,data:any){
     this.isLoadingSubject.next(true);
     let URL = URL_SERVICIOS+"/proforma-details/"+DETAIL_ID;
@@ -135,11 +133,22 @@ export class ProformasService {
       finalize(() => this.isLoadingSubject.next(false))
     );
   }
+
   deleteDetailProforma(DETAIL_ID:string){
     this.isLoadingSubject.next(true);
     let URL = URL_SERVICIOS+"/proforma-details/"+DETAIL_ID;
     let headers = new HttpHeaders({'Authorization': 'Bearer '+this.authservice.token});
     return this.http.delete(URL,{headers:headers}).pipe(
+      finalize(() => this.isLoadingSubject.next(false))
+    );
+  }
+
+  // NUEVO: Tomar Insumos
+  tomarInsumos(proforma_id: string) {
+    this.isLoadingSubject.next(true);
+    const URL = `${URL_SERVICIOS}/proformas/${proforma_id}/tomar-insumos`;
+    const headers = new HttpHeaders({ 'Authorization': 'Bearer ' + this.authservice.token });
+    return this.http.post(URL, {}, { headers }).pipe(
       finalize(() => this.isLoadingSubject.next(false))
     );
   }

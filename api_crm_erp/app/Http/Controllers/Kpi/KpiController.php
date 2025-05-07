@@ -256,6 +256,8 @@ class KpiController extends Controller
                                 ->take(1)
                                 ->get()->first();
 
+
+                                
         $date_last = Carbon::parse($year.'-'.$month.'-01')->subMonth();
 
         $asesor_total_sales_month_before = DB::table("proformas")->where("proformas.deleted_at",NULL)

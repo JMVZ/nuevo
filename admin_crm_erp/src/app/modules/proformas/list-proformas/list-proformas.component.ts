@@ -46,6 +46,7 @@ export class ListProformasComponent {
     this.listProformas();
     this.configAll();
   }
+  
 
   listProformas(page = 1){
     let data = {
@@ -112,6 +113,22 @@ export class ListProformasComponent {
   proformaPdf(PROFORMA:any){
     window.open(URL_SERVICIOS+"/pdf/proforma/"+PROFORMA.id,"_blank");
   }
+  tomarInsumos(PROFORMA: any) {
+    if (!confirm("¿Estás seguro de tomar los insumos para este proyecto?")) {
+      return;
+    }
+  
+    this.proformasService.tomarInsumos(PROFORMA.id).subscribe({
+      next: () => {
+        alert("Insumos tomados correctamente.");
+        this.listProformas(this.currentPage); // Refresca la lista
+      },
+      error: (err) => {
+        alert("Error al tomar insumos: " + (err.error?.message || "Error desconocido"));
+      }
+    });
+  }
+  
   exportProformas(){
     let LINK="";
     if(this.search){

@@ -164,6 +164,9 @@ class Proforma extends Model
         return $query;
     }
 
+        
+
+
     public function scopeFilterShort($query, $n_proforma, $state_payment)
     {
         if ($n_proforma) {

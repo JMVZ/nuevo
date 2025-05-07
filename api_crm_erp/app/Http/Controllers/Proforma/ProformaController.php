@@ -28,6 +28,9 @@ use App\Http\Resources\Product\ProductCollection;
 use App\Http\Resources\Proforma\ProformaResource;
 use App\Http\Resources\Proforma\ProformaCollection;
 use Symfony\Component\HttpKernel\Exception\HttpException;
+use App\Models\Ordenes\OrdenConsumo;
+use App\Models\Ordenes\OrdenConsumoDetalle;
+
 
 class ProformaController extends Controller
 {
@@ -96,6 +99,59 @@ class ProformaController extends Controller
             })
         ]);
     }
+
+    public function tomarInsumos($proformaId)
+    {
+        DB::beginTransaction();
+
+        try {
+            $proforma = Proforma::with('details.product')->findOrFail($proformaId);
+
+            if ($proforma->state_proforma == 2) {
+                return response()->json(['message' => 'Ya se tomaron los insumos de este proyecto.'], 400);
+            }
+
+            // Crear orden de consumo
+            $ordenConsumo = OrdenConsumo::create([
+                'proforma_id' => $proforma->id,
+                'user_id' => auth()->id(),
+            ]);
+
+            foreach ($proforma->details as $detail) {
+                $product = $detail->product;
+                $cantidad = $detail->quantity;
+
+                $productWarehouse = ProductWarehouse::where('product_id', $product->id)->first();
+                if (!$productWarehouse || $productWarehouse->stock < $cantidad) {
+                    DB::rollBack();
+                    return response()->json(['message' => "No hay stock suficiente para el producto: {$product->title}"], 400);
+                }
+
+                // Crear detalle
+                OrdenConsumoDetalle::create([
+                    'orden_consumo_id' => $ordenConsumo->id,
+                    'product_id' => $product->id,
+                    'unit_id' => $detail->unit_id,
+                    'cantidad' => $cantidad,
+                ]);
+
+                // Descontar del stock
+                $productWarehouse->stock -= $cantidad;
+                $productWarehouse->save();
+            }
+
+            $proforma->state_proforma = 2; // Estado tomado / en producción
+            $proforma->save();
+
+            DB::commit();
+            return response()->json(['message' => 'Insumos tomados correctamente.']);
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return response()->json(['message' => 'Error al tomar insumos.', 'error' => $e->getMessage()], 500);
+        }
+    }
+
     public function search_products(Request $request){
         $search = $request->get("search");
         $products = Product::where(DB::raw("CONCAT(products.title,' ',products.sku)"),"like","%".$search."%")->orderBy("id","desc")->get();
