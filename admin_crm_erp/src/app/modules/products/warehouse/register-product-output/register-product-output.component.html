@@ -1,0 +1,100 @@
+<div class="modal-content">
+  <div class="modal-header">
+    <h2 class="fw-bolder">Registrar Salida de Producto</h2>
+    <div class="btn btn-icon btn-sm btn-active-icon-primary" (click)="modal.dismiss()">
+      <span class="svg-icon svg-icon-1">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none">
+          <rect opacity="0.5" x="6" y="17.3137" width="16" height="2" rx="1" transform="rotate(-45 6 17.3137)" fill="currentColor" />
+          <rect x="7.41422" y="6" width="16" height="2" rx="1" transform="rotate(45 7.41422 6)" fill="currentColor" />
+        </svg>
+      </span>
+    </div>
+  </div>
+
+  <div class="modal-body scroll-y mx-5 my-7">
+    <div class="card mb-5">
+      <div class="card-body">
+        <h5 class="card-title mb-4">Información del Producto</h5>
+        <div class="row">
+          <div class="col-md-6">
+            <p class="mb-2"><strong>Producto:</strong> {{ WAREHOUSE_PRODUCT?.product?.name || 'No disponible' }}</p>
+            <p class="mb-2"><strong>Almacén:</strong> {{ WAREHOUSE_PRODUCT?.warehouse?.name || 'No disponible' }}</p>
+          </div>
+          <div class="col-md-6">
+            <p class="mb-2"><strong>Unidad:</strong> {{ WAREHOUSE_PRODUCT?.unit?.name || 'No disponible' }}</p>
+            <p class="mb-2"><strong>Stock Actual:</strong> {{ WAREHOUSE_PRODUCT?.quantity || 0 }}</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <form (ngSubmit)="register()">
+      <div class="row mb-5">
+        <div class="col-md-6">
+          <label class="required form-label">Cantidad</label>
+          <input 
+            type="number" 
+            class="form-control" 
+            [(ngModel)]="formData.quantity" 
+            name="quantity"
+            min="1"
+            [max]="WAREHOUSE_PRODUCT?.quantity || 0"
+            required>
+          <div class="text-muted fs-7">Ingrese la cantidad a retirar</div>
+        </div>
+      </div>
+
+      <div class="row mb-5">
+        <div class="col-12">
+          <label class="required form-label">Motivo</label>
+          <textarea 
+            class="form-control" 
+            [(ngModel)]="formData.reason" 
+            name="reason"
+            rows="3"
+            required></textarea>
+          <div class="text-muted fs-7">Describa el motivo de la salida</div>
+        </div>
+      </div>
+
+      <div class="row mb-5">
+        <div class="col-md-6">
+          <label class="form-label">Proforma (Opcional)</label>
+          <select 
+            class="form-select" 
+            [(ngModel)]="formData.proforma_id" 
+            name="proforma_id">
+            <option [ngValue]="undefined">Seleccione una proforma</option>
+            <option *ngFor="let proforma of proformas" [ngValue]="proforma.id">
+              {{ proforma.codigo }} - {{ proforma.client?.full_name || proforma.client?.name || 'Sin cliente' }} 
+              - {{ proforma.final_product_title || 'Sin título' }}
+            </option>
+          </select>
+          <div class="text-muted fs-7">Seleccione la proforma relacionada (opcional)</div>
+        </div>
+
+        <div class="col-md-6">
+          <label class="form-label">Usuario de Producción (Opcional)</label>
+          <select 
+            class="form-select" 
+            [(ngModel)]="formData.user_id" 
+            name="user_id">
+            <option [ngValue]="undefined">Seleccione un usuario</option>
+            <option *ngFor="let user of productionUsers" [ngValue]="user.id">
+              {{ user.name }} {{ user.surname || '' }} - {{ user.sucursale?.name || 'Sin sucursal' }}
+            </option>
+          </select>
+          <div class="text-muted fs-7">Seleccione el usuario de producción (opcional)</div>
+        </div>
+      </div>
+
+      <div class="text-center pt-15">
+        <button type="button" class="btn btn-light me-3" (click)="modal.dismiss()">Cancelar</button>
+        <button type="submit" class="btn btn-primary" [disabled]="isLoading">
+          <span class="indicator-label">Registrar Salida</span>
+          <span class="spinner-border spinner-border-sm align-middle ms-2" *ngIf="isLoading"></span>
+        </button>
+      </div>
+    </form>
+  </div>
+</div> 

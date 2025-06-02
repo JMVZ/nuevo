@@ -29,6 +29,7 @@ export class CreateClientsPersonComponent {
   phone:number = 0;
   email:string = '';
   asesor_id:string = '';
+  religion:string = 'No especificado';
 
   REGIONES:any = UBIGEO_REGIONES;
   PROVINCIAS:any = UBIGEO_PROVINCIA;
@@ -93,12 +94,26 @@ export class CreateClientsPersonComponent {
     if(!this.name || !this.surname || !this.client_segment_id || 
       !this.type_document || !this.n_document || !this.origen || 
       !this.sexo || !this.birthdate || !this.phone
-      || !this.ubigeo_region || !this.ubigeo_provincia || !this.ubigeo_distrito
       || !this.address
     ){
       this.toast.error("Validación","Necesitas llenar todos los campos con la referencia (*)");
       return false;
     }
+
+    // Establecer valores por defecto para campos no especificados
+    if(!this.ubigeo_region) {
+      this.ubigeo_region = 'No especificado';
+      this.region = 'No especificado';
+    }
+    if(!this.ubigeo_provincia) {
+      this.ubigeo_provincia = 'No especificado';
+      this.provincia = 'No especificado';
+    }
+    if(!this.ubigeo_distrito) {
+      this.ubigeo_distrito = 'No especificado';
+      this.distrito = 'No especificado';
+    }
+
     let DISTRITO_SELECTED = this.DISTRITOS.find((distr:any) => distr.id == this.ubigeo_distrito);
     if(DISTRITO_SELECTED){
       this.distrito = DISTRITO_SELECTED.name;

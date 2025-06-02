@@ -31,3 +31,24 @@
 .toast-warning {
     background-color: #ffe1b6 !important;
 }
+
+body.modal-light-force-global .modal-content,
+body.modal-light-force-global .modal-header,
+body.modal-light-force-global .modal-body,
+body.modal-light-force-global .modal-footer,
+body.modal-light-force-global .table,
+body.modal-light-force-global .form-control,
+body.modal-light-force-global .btn {
+  background: #fff !important;
+  color: #222 !important;
+  border-color: #dee2e6 !important;
+}
+
+.blink-warning {
+  animation: blink-red 1s steps(2, start) infinite;
+}
+@keyframes blink-red {
+  to {
+    visibility: hidden;
+  }
+}

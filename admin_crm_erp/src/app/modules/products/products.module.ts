@@ -16,7 +16,10 @@ import { DeleteWalletPriceProductComponent } from './wallet/delete-wallet-price-
 import { EditWarehouseProductComponent } from './warehouse/edit-warehouse-product/edit-warehouse-product.component';
 import { DeleteWarehouseProductComponent } from './warehouse/delete-warehouse-product/delete-warehouse-product.component';
 import { ImportProductsComponent } from './import-products/import-products.component';
-
+import { EntradasProductosComponent } from './entradas-productos/entradas-productos.component';
+import { SalidasProductosComponent } from './salidas-productos/salidas-productos.component';
+import { RegisterProductOutputComponent } from './warehouse/register-product-output/register-product-output.component';
+import { SharedModule } from '../../shared/shared.module';
 
 @NgModule({
   declarations: [
@@ -30,18 +33,21 @@ import { ImportProductsComponent } from './import-products/import-products.compo
     EditWarehouseProductComponent,
     DeleteWarehouseProductComponent,
     ImportProductsComponent,
+    EntradasProductosComponent,
+    SalidasProductosComponent,
+    RegisterProductOutputComponent
   ],
   imports: [
     CommonModule,
     ProductsRoutingModule,
-
     HttpClientModule,
     FormsModule,
-    NgbModule,
     ReactiveFormsModule,
-    InlineSVGModule,
+    NgbModule,
     NgbModalModule,
     NgbPaginationModule,
+    InlineSVGModule,
+    SharedModule
   ]
 })
 export class ProductsModule { }

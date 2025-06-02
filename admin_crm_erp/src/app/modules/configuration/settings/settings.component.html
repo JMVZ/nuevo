@@ -1,0 +1,49 @@
+<div class="card">
+  <div class="card-header">
+    <h3 class="card-title">Configuración de Moneda</h3>
+  </div>
+  <div class="card-body">
+    <form [formGroup]="currencyForm" (ngSubmit)="saveCurrencySettings()">
+      <div class="row">
+        <div class="col-md-4">
+          <div class="form-group">
+            <label>Código de Moneda</label>
+            <input type="text" class="form-control" formControlName="currency" placeholder="Ej: USD, EUR, PEN">
+            <div class="invalid-feedback" *ngIf="currencyForm.get('currency')?.errors?.['required'] && currencyForm.get('currency')?.touched">
+              El código de moneda es requerido
+            </div>
+            <div class="invalid-feedback" *ngIf="currencyForm.get('currency')?.errors?.['minlength'] && currencyForm.get('currency')?.touched">
+              El código debe tener 3 caracteres
+            </div>
+          </div>
+        </div>
+        <div class="col-md-4">
+          <div class="form-group">
+            <label>Símbolo de Moneda</label>
+            <input type="text" class="form-control" formControlName="symbol" placeholder="Ej: $, €, S/">
+            <div class="invalid-feedback" *ngIf="currencyForm.get('symbol')?.errors?.['required'] && currencyForm.get('symbol')?.touched">
+              El símbolo es requerido
+            </div>
+          </div>
+        </div>
+        <div class="col-md-4">
+          <div class="form-group">
+            <label>Posición del Símbolo</label>
+            <select class="form-control" formControlName="position">
+              <option value="left">Izquierda</option>
+              <option value="right">Derecha</option>
+            </select>
+          </div>
+        </div>
+      </div>
+      <div class="row mt-4">
+        <div class="col-12">
+          <button type="submit" class="btn btn-primary" [disabled]="isLoading$">
+            <span *ngIf="isLoading$" class="spinner-border spinner-border-sm mr-1"></span>
+            Guardar Configuración
+          </button>
+        </div>
+      </div>
+    </form>
+  </div>
+</div> 

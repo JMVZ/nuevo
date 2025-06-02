@@ -1,4 +1,5 @@
 import { Routes } from '@angular/router';
+import { AuthGuard } from '../guards/auth.guard';
 
 const Routing: Routes = [
   {
@@ -103,6 +104,15 @@ const Routing: Routes = [
   {
     path: 'kardex',
     loadChildren: () => import('../modules/kardex/kardex.module').then((m) => m.KardexModule),
+  },
+  {
+    path: 'reports',
+    loadChildren: () => import('../modules/reports/reports.module').then(m => m.ReportsModule),
+    canActivate: [AuthGuard],
+    data: {
+      layout: 'light-sidebar',
+      permissions: ['report_product_outputs', 'report_user_consumption', 'report_proforma_outputs']
+    }
   },
   {
     path: '',

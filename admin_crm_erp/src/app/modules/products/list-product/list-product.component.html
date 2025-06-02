@@ -1,3 +1,13 @@
+<!-- BOTÓN DE INSUMOS EN NEGATIVO (SOLO ICONO) -->
+<!-- <button
+  class="btn btn-danger btn-lg d-flex align-items-center justify-content-center shadow mb-3"
+  (click)="abrirModalInsumosNegativos()"
+  title="Ver insumos en negativo"
+  style="width: 60px; height: 60px; border-radius: 50%; font-size: 2rem;"
+>
+  <i class="ki-duotone ki-warning fs-1"></i>
+</button> -->
+
 <div class="card">
     <!--begin::Card header-->
     <div class="card-header border-0 pt-6">
@@ -12,15 +22,14 @@
                             class="form-control form-control-solid w-250px ps-12" placeholder="Search Products">
                     </div>
                 </div>
-                <div class="col-3">
-                    <select class="form-select mb-2" [(ngModel)]="product_categorie_id" name="product_categorie_id">
-                        <ng-container *ngFor="let CATEGORIE of CATEGORIES">
-                            <option [value]="CATEGORIE.id" >{{ CATEGORIE.name }}</option>
-                        </ng-container>
-                    </select>
-                    <!--end::Select2-->
-                    <!--begin::Description-->
-                    <div class="text-muted fs-7">Categoria.</div>
+                <div class="col-2">
+                    <button class="btn btn-light-primary me-3" (click)="toggleSort()">
+                        <i class="ki-duotone ki-sort-ascending fs-2">
+                            <span class="path1"></span>
+                            <span class="path2"></span>
+                        </i>
+                        Ordenar {{ sortOrder === 'asc' ? 'A-Z' : 'Z-A' }}
+                    </button>
                 </div>
                 <div class="col-2">
                     <select class="form-select mb-2" [(ngModel)]="disponibilidad" name="disponibilidad">
@@ -146,13 +155,42 @@
                     <i class="ki-duotone ki-update-folder fs-2"><span class="path1"></span><span class="path2"></span></i> 
                 </button>
 
-                <button *ngIf="num_products_agotado > 0" class="btn btn-danger btn-sm mx-1" (click)="selectAgotado()">
-                    ({{ num_products_agotado }})
-                </button>
-                <button *ngIf="num_products_por_agotar > 0" class="btn btn-warning btn-sm mx-1" (click)="selectPorAgotado()">
-                    ({{ num_products_por_agotar  }})
-                </button>
+                <!-- Contenedor de botones de inventario -->
+                <div class="d-flex flex-wrap gap-2 align-items-center mb-3">
+                    <!-- Botón rojo de productos terminados (agotados) -->
+                    <button *ngIf="num_products_agotado > 0" class="btn btn-danger btn-sm d-flex align-items-center gap-1" (click)="selectAgotado()">
+                      <i class="ki-duotone ki-warning fs-2"></i>
+                      <span class="fw-bold">Agotados ({{ num_products_agotado }})</span>
+                    </button>
 
+                    <!-- Botón naranja de productos por terminarse -->
+                    <button *ngIf="num_products_por_agotar > 0" class="btn btn-warning btn-sm d-flex align-items-center gap-1" (click)="selectPorAgotado()">
+                      <i class="ki-duotone ki-warning fs-2 text-dark"></i>
+                      <span class="fw-bold text-dark">Por terminarse ({{ num_products_por_agotar }})</span>
+                    </button>
+
+                    <!-- Botón de advertencia rectangular con texto -->
+                    <button class="btn btn-danger btn-sm d-flex align-items-center justify-content-center gap-2" style="height: 40px; padding: 0 16px;" (click)="abrirModalInsumosNegativos()" title="Ver insumos faltantes">
+                      <i class="ki-duotone ki-warning fs-1"><span class="path1"></span><span class="path2"></span></i>
+                      <span class="fw-bold">Insumos faltantes</span>
+                    </button>
+                </div>
+
+                <!-- Botón naranja de stock bajo (si existe la variable) -->
+                <button *ngIf="num_products_bajo > 0" class="btn btn-warning btn-sm mx-1 d-flex align-items-center gap-1" (click)="selectBajo()">
+                  <i class="ki-duotone ki-warning fs-2 text-dark"></i>
+                  <span class="fw-bold text-dark">Stock bajo ({{ num_products_bajo }})</span>
+                </button>
+            </div>
+            <div class="col-2">
+                <select class="form-select mb-2" [(ngModel)]="product_categorie_id" name="product_categorie_id" data-control="select2" data-hide-search="true" data-placeholder="Select an option">
+                    <ng-container *ngFor="let CATEGORIE of CATEGORIES">
+                        <option [value]="CATEGORIE.id">{{ CATEGORIE.name }}</option>
+                    </ng-container>
+                </select>
+                <!--end::Select2-->
+                <!--begin::Description-->
+                <div class="text-muted fs-7">Categoria.</div>
             </div>
         </div>
         <!--begin::Table-->
@@ -170,17 +208,17 @@
 
                             <th class="min-w-125px dt-orderable-asc dt-orderable-desc" data-dt-column="1" rowspan="1"
                                 colspan="1" aria-label="Customer Name: Activate to sort" tabindex="0"><span
-                                    class="dt-column-title" role="button">Categoria</span><span
-                                    class="dt-column-order"></span></th>
-
-                            <th class="min-w-125px dt-orderable-asc dt-orderable-desc" data-dt-column="1" rowspan="1"
-                                colspan="1" aria-label="Customer Name: Activate to sort" tabindex="0"><span
-                                    class="dt-column-title" role="button">Precio General</span><span
+                                    class="dt-column-title" role="button">Stock</span><span
                                     class="dt-column-order"></span></th>
 
                             <th class="min-w-125px dt-orderable-asc dt-orderable-desc" data-dt-column="1" rowspan="1"
                                 colspan="1" aria-label="Customer Name: Activate to sort" tabindex="0"><span
                                     class="dt-column-title" role="button">Disponibilidad</span><span
+                                    class="dt-column-order"></span></th>
+
+                            <th class="min-w-125px dt-orderable-asc dt-orderable-desc" data-dt-column="1" rowspan="1"
+                                colspan="1" aria-label="Customer Name: Activate to sort" tabindex="0"><span
+                                    class="dt-column-title" role="button">Categoria</span><span
                                     class="dt-column-order"></span></th>
 
                             <th class="min-w-125px dt-orderable-asc dt-orderable-desc" data-dt-column="1" rowspan="1"
@@ -208,32 +246,31 @@
                             <tr>
                                 <td>
                                     <div class="d-flex align-items-center">
-                                        <div class="symbol symbol-50px me-5">
-                                            <img [src]="PRODUCT.imagen" class="" alt="">
-                                        </div>
-                                        
                                         <div class="d-flex justify-content-start flex-column">
-                                            <a href="#" class="text-gray-900 fw-bold text-hover-primary mb-1 fs-6">{{ PRODUCT.title }}</a>
+                                            <a href="#" class="text-gray-900 fw-bold text-hover-primary mb-1 fs-6">{{ PRODUCT.title }} - {{ PRODUCT.description }}</a>
                                             <span class="text-muted fw-semibold text-muted d-block fs-7">Peso: {{ PRODUCT.weight }}</span>
                                             <span class="badge badge-light-primary" *ngIf="PRODUCT.state_stock == 1">Disponible</span>
                                             <span class="badge badge-light-warning" *ngIf="PRODUCT.state_stock == 2">Por agotar</span>
                                             <span class="badge badge-light-danger" *ngIf="PRODUCT.state_stock == 3">Agotado</span>
                                         </div>
-
-
                                     </div>
                                 </td>
 
                                 <td>
-                                    {{ PRODUCT.product_categorie.name }}
+                                    <div class="d-flex flex-column">
+                                        <ng-container *ngFor="let warehouse of PRODUCT.warehouses">
+                                            <span class="badge badge-light-info mb-1">{{ warehouse.unit.name }}: {{ warehouse.quantity }} en {{ warehouse.warehouse.name }}</span>
+                                        </ng-container>
+                                    </div>
                                 </td>
-                                
+
                                 <td>
-                                    {{ PRODUCT.price_general }}
+                                    {{ getDisponibilidad(PRODUCT.disponiblidad) }}
                                 </td>
-    
-                                <td >
-                                    {{ getDisponibilidad(PRODUCT.disponiblidad) }} </td>
+
+                                <td>
+                                    {{ PRODUCT.product_categorie?.name || 'Sin categoría' }}
+                                </td>
 
                                 <td >
                                     {{ PRODUCT.sku }} </td>
@@ -267,7 +304,7 @@
             <ngb-pagination
                 [collectionSize]="totalPages"
                 [(page)]="currentPage"
-                [pageSize]="25"
+                [pageSize]="50"
                 [rotate]="true"
                 [boundaryLinks]="true"
                 (pageChange)="loadPage($event)"
@@ -277,3 +314,44 @@
     </div>
     <!--end::Card body-->
 </div>
+
+<!-- MODAL DE INSUMOS EN NEGATIVO -->
+<ng-template #modalInsumosNegativos let-modal>
+  <div class="modal-content">
+    <div class="modal-header bg-danger text-white">
+      <h5 class="modal-title d-flex align-items-center gap-2">
+        <i class="ki-duotone ki-warning fs-2"></i>
+        Insumos en negativo
+      </h5>
+      <button type="button" class="btn-close btn-close-white" aria-label="Cerrar" (click)="modal.dismiss()"></button>
+    </div>
+    <div class="modal-body">
+      <table class="table table-bordered table-hover">
+        <thead>
+          <tr>
+            <th>Material</th>
+            <th>Stock actual</th>
+            <th>Requerido en proformas</th>
+            <th>Diferencia</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let insumo of insumosNegativos">
+            <td>{{ insumo.nombre }}</td>
+            <td>{{ insumo.stock }}</td>
+            <td>{{ insumo.requerido }}</td>
+            <td>
+              <span class="text-danger fw-bold">
+                <i class="ki-duotone ki-warning fs-2"></i>
+                {{ insumo.diferencia }}
+              </span>
+            </td>
+          </tr>
+          <tr *ngIf="insumosNegativos.length === 0">
+            <td colspan="4" class="text-center text-success">No hay insumos en negativo 🎉</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</ng-template>

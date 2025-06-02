@@ -1,0 +1,35 @@
+<div class="card">
+  <div class="card-header">
+    <h3 class="card-title">Reportes</h3>
+  </div>
+  <div class="card-body">
+    <div class="tabs-container">
+      <ul class="nav nav-tabs nav-line-tabs mb-5 fs-6">
+        <li class="nav-item">
+          <a class="nav-link" [class.active]="activeTab === 'product-outputs'" 
+             (click)="setActiveTab('product-outputs')">
+            Salidas de Productos
+          </a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" [class.active]="activeTab === 'user-consumption'" 
+             (click)="setActiveTab('user-consumption')">
+            Consumo por Usuario
+          </a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" [class.active]="activeTab === 'proforma-outputs'" 
+             (click)="setActiveTab('proforma-outputs')">
+            Salidas por Proforma
+          </a>
+        </li>
+      </ul>
+    </div>
+
+    <div class="tab-content">
+      <app-product-outputs-report *ngIf="activeTab === 'product-outputs'"></app-product-outputs-report>
+      <app-user-consumption-report *ngIf="activeTab === 'user-consumption'"></app-user-consumption-report>
+      <app-proforma-outputs-report *ngIf="activeTab === 'proforma-outputs'"></app-proforma-outputs-report>
+    </div>
+  </div>
+</div> 

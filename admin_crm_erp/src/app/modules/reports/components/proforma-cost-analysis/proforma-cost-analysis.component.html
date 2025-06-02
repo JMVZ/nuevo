@@ -1,0 +1,209 @@
+<!--begin::Card-->
+<div class="card">
+    <!--begin::Card header-->
+    <div class="card-header border-0 pt-6">
+        <div class="card-title">
+            <h3>Análisis de Costos por Proforma</h3>
+        </div>
+    </div>
+    <!--end::Card header-->
+
+    <!--begin::Card body-->
+    <div class="card-body pt-0">
+        <!--begin::Filters-->
+        <form [formGroup]="filterForm">
+            <div class="row mb-5">
+                <div class="col-md-6">
+                    <label class="form-label required">Buscar Proforma</label>
+                    <div class="input-group">
+                        <input type="text" 
+                               class="form-control" 
+                               formControlName="proformaId"
+                               placeholder="Escriba para buscar proformas y presione Enter..."
+                               (keyup.enter)="searchProformas()"
+                               (click)="$event.stopPropagation()">
+                        <div *ngIf="loading" class="input-group-text">
+                            <span class="spinner-border spinner-border-sm"></span>
+                        </div>
+                    </div>
+                    <div *ngIf="!loading && proformas.length === 0" class="text-muted mt-2">
+                        No se encontraron proformas
+                    </div>
+                    <div *ngIf="selectedProforma" class="alert alert-info mt-3">
+                        <strong>Proforma seleccionada:</strong> {{selectedProforma.client?.full_name}} - {{selectedProforma.final_product_title || 'Sin producto'}}
+                    </div>
+                </div>
+            </div>
+        </form>
+        <!--end::Filters-->
+
+        <!--begin::Actions-->
+        <div class="d-flex justify-content-end mb-5">
+            <button type="button" class="btn btn-primary me-3" (click)="generateReport()" [disabled]="!selectedProforma || generatingReport">
+                <span class="indicator-label" *ngIf="!generatingReport">Generar Reporte</span>
+                <span class="indicator-progress" *ngIf="generatingReport">
+                    Generando... <span class="spinner-border spinner-border-sm align-middle ms-2"></span>
+                </span>
+            </button>
+            <button type="button" class="btn btn-success" (click)="exportToExcel()" [disabled]="!reportData">
+                Exportar a Excel
+            </button>
+        </div>
+        <!--end::Actions-->
+
+        <!--begin::Report Content-->
+        <div *ngIf="reportData" class="report-content">
+            <!--begin::Proforma Info-->
+            <div class="d-flex flex-column mb-8">
+                <div class="d-flex align-items-center mb-3">
+                    <span class="text-gray-800 fw-bold fs-4 me-2">Información de la Proforma:</span>
+                </div>
+                <div class="d-flex flex-wrap">
+                    <div class="border border-gray-300 border-dashed rounded py-3 px-4 me-3 mb-3">
+                        <div class="fs-6 text-gray-800 fw-bold">Código: {{reportData.proforma.codigo}}</div>
+                    </div>
+                    <div class="border border-gray-300 border-dashed rounded py-3 px-4 me-3 mb-3">
+                        <div class="fs-6 text-gray-800 fw-bold">Cliente: {{reportData.proforma.cliente}}</div>
+                    </div>
+                    <div class="border border-gray-300 border-dashed rounded py-3 px-4 me-3 mb-3">
+                        <div class="fs-6 text-gray-800 fw-bold">Fecha: {{reportData.proforma.fecha | date:'dd/MM/yyyy'}}</div>
+                    </div>
+                    <div class="border border-gray-300 border-dashed rounded py-3 px-4 me-3 mb-3">
+                        <div class="fs-6 text-gray-800 fw-bold">Precio Final: MXN {{reportData.proforma.precio_final | number:'1.2-2'}}</div>
+                    </div>
+                </div>
+            </div>
+            <!--end::Proforma Info-->
+
+            <!--begin::Cost Analysis-->
+            <div class="d-flex flex-column mb-8">
+                <div class="d-flex align-items-center mb-3">
+                    <span class="text-gray-800 fw-bold fs-4 me-2">Análisis de Costos:</span>
+                </div>
+                <div class="d-flex flex-wrap">
+                    <div class="border border-gray-300 border-dashed rounded py-3 px-4 me-3 mb-3">
+                        <div class="fs-6 text-gray-800 fw-bold">Total Insumos (Sin IVA): MXN {{reportData.costos.total_insumos_sin_iva | number:'1.2-2'}}</div>
+                    </div>
+                    <div class="border border-gray-300 border-dashed rounded py-3 px-4 me-3 mb-3">
+                        <div class="fs-6 text-gray-800 fw-bold">Total Insumos (Con IVA): MXN {{reportData.costos.total_insumos_con_iva | number:'1.2-2'}}</div>
+                    </div>
+                    <div class="border border-gray-300 border-dashed rounded py-3 px-4 me-3 mb-3">
+                        <div class="fs-6 text-gray-800 fw-bold">Ganancia (Sin IVA): MXN {{reportData.analisis.ganancia_sin_iva | number:'1.2-2'}}</div>
+                    </div>
+                    <div class="border border-gray-300 border-dashed rounded py-3 px-4 me-3 mb-3">
+                        <div class="fs-6 text-gray-800 fw-bold">Ganancia (Con IVA): MXN {{reportData.analisis.ganancia_con_iva | number:'1.2-2'}}</div>
+                    </div>
+                    <div class="border border-gray-300 border-dashed rounded py-3 px-4 me-3 mb-3">
+                        <div class="fs-6 text-gray-800 fw-bold">Porcentaje (Sin IVA): {{reportData.analisis.porcentaje_ganancia_sin_iva | number:'1.2-2'}}%</div>
+                    </div>
+                    <div class="border border-gray-300 border-dashed rounded py-3 px-4 me-3 mb-3">
+                        <div class="fs-6 text-gray-800 fw-bold">Porcentaje (Con IVA): {{reportData.analisis.porcentaje_ganancia_con_iva | number:'1.2-2'}}%</div>
+                    </div>
+                    <div class="border border-gray-300 border-dashed rounded py-3 px-4 me-3 mb-3">
+                        <div class="fs-6 text-gray-800 fw-bold">Estado (Sin IVA): 
+                            <span [ngClass]="{'text-success': reportData.analisis.estado_sin_iva === 'rentable', 'text-danger': reportData.analisis.estado_sin_iva === 'no_rentable'}">
+                                {{reportData.analisis.estado_sin_iva === 'rentable' ? 'Rentable' : 'No Rentable'}}
+                            </span>
+                        </div>
+                    </div>
+                    <div class="border border-gray-300 border-dashed rounded py-3 px-4 me-3 mb-3">
+                        <div class="fs-6 text-gray-800 fw-bold">Estado (Con IVA): 
+                            <span [ngClass]="{'text-success': reportData.analisis.estado_con_iva === 'rentable', 'text-danger': reportData.analisis.estado_con_iva === 'no_rentable'}">
+                                {{reportData.analisis.estado_con_iva === 'rentable' ? 'Rentable' : 'No Rentable'}}
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!--end::Cost Analysis-->
+
+            <!--begin::Cost Details Table-->
+            <div class="d-flex flex-column">
+                <div class="d-flex align-items-center mb-3">
+                    <span class="text-gray-800 fw-bold fs-4 me-2">Detalle de Insumos:</span>
+                </div>
+                <div class="table-responsive">
+                    <table class="table table-row-bordered table-row-gray-100 align-middle gs-0 gy-3">
+                        <thead>
+                            <tr class="fw-bold text-muted">
+                                <th class="min-w-150px">Producto</th>
+                                <th class="min-w-100px">Cantidad</th>
+                                <th class="min-w-100px">Unidad</th>
+                                <th class="min-w-100px">Costo Unitario</th>
+                                <th class="min-w-100px">Costo Sin IVA</th>
+                                <th class="min-w-100px">Costo Con IVA</th>
+                                <th class="min-w-100px">% IVA</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr *ngFor="let detalle of reportData.costos.detalles">
+                                <td>{{detalle.producto}}</td>
+                                <td>{{detalle.cantidad}}</td>
+                                <td>{{detalle.unidad}}</td>
+                                <td>MXN {{detalle.costo_unitario | number:'1.2-2'}}</td>
+                                <td>MXN {{detalle.costo_sin_iva | number:'1.2-2'}}</td>
+                                <td>MXN {{detalle.costo_con_iva | number:'1.2-2'}}</td>
+                                <td>{{detalle.porcentaje_iva}}%</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <!--end::Cost Details Table-->
+        </div>
+        <!--end::Report Content-->
+
+        <!--begin::Empty state-->
+        <div *ngIf="!loading && !reportData" class="text-center py-10">
+            <i class="ki-duotone ki-document fs-3x text-gray-400 mb-5">
+                <span class="path1"></span>
+                <span class="path2"></span>
+            </i>
+            <div class="text-gray-600 fw-bold fs-5">No hay datos para mostrar</div>
+            <div class="text-gray-500 fw-semibold fs-6">Seleccione una proforma para generar el reporte</div>
+        </div>
+        <!--end::Empty state-->
+    </div>
+    <!--end::Card body-->
+</div>
+<!--end::Card-->
+
+<!--begin::Modal-->
+<ng-template #proformasModal>
+    <div class="modal-content">
+        <div class="modal-header">
+            <h5 class="modal-title">Seleccionar Proforma</h5>
+            <button type="button" class="btn-close" aria-label="Close" (click)="modalService.dismissAll()"></button>
+        </div>
+        <div class="modal-body">
+            <div class="table-responsive">
+                <table class="table table-row-bordered table-row-gray-100 align-middle gs-0 gy-3">
+                    <thead>
+                        <tr class="fw-bold text-muted">
+                            <th>Código</th>
+                            <th>Cliente</th>
+                            <th>Producto</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr *ngFor="let proforma of proformas">
+                            <td>{{proforma.codigo}}</td>
+                            <td>{{proforma.client?.full_name || 'Sin cliente'}}</td>
+                            <td>{{proforma.final_product_title || 'Sin producto'}}</td>
+                            <td>
+                                <button type="button" class="btn btn-sm btn-primary" (click)="selectProforma(proforma)">
+                                    Seleccionar
+                                </button>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" (click)="modalService.dismissAll()">Cerrar</button>
+        </div>
+    </div>
+</ng-template>
+<!--end::Modal--> 

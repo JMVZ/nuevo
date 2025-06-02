@@ -4,6 +4,8 @@ import { ProductsComponent } from './products.component';
 import { ListProductComponent } from './list-product/list-product.component';
 import { CreateProductComponent } from './create-product/create-product.component';
 import { EditProductComponent } from './edit-product/edit-product.component';
+import { EntradasProductosComponent } from './entradas-productos/entradas-productos.component';
+import { SalidasProductosComponent } from './salidas-productos/salidas-productos.component';
 
 const routes: Routes = [
   {
@@ -21,6 +23,14 @@ const routes: Routes = [
       {
         path: 'list/editar/:id',
         component: EditProductComponent
+      },
+      {
+        path: 'entradas',
+        component: EntradasProductosComponent
+      },
+      {
+        path: 'salidas',
+        component: SalidasProductosComponent
       }
     ]
   }

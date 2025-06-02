@@ -34,80 +34,103 @@
                             <thead>
                                 <tr class="fw-bold text-muted">
                                     <th class="min-w-150px">Producto</th>
-                                    <th class="min-w-120px">Categoria</th>
+                                    <th class="min-w-120px">Descripción</th>
                                     <th class="min-w-140px">Unidad</th>
-                                    <th class="min-w-120px">Precio Unitario</th>
-                                    <th class="min-w-120px">Descuento</th>
-                                    <th class="min-w-120px">Subtotal</th>
-                                    <th class="min-w-120px">Impuesto</th>
                                     <th class="min-w-120px">Cantidad</th>
-                                    <th class="min-w-120px">Total</th>
                                 </tr>
                             </thead>
                             <!--end::Table head-->
-            
+                
                             <!--begin::Table body-->
                             <tbody>
-                                <ng-container *ngFor="let DETAIL_PROFORMA of PROFORMA.details">
-                                    <tr>
-                                        
-                                        <td>
-                                            <div class="d-flex align-items-center">
-                                                <div class="symbol symbol-50px me-5">
-                                                    <img [src]="DETAIL_PROFORMA.product.imagen" class="" alt="">
-                                                </div>
+                                <ng-container *ngFor="let subproyecto of PROFORMA.subproyectos">
+                                    <tr class="bg-light-primary">
+                                        <td colspan="4" class="fw-bold">
+                                            {{ subproyecto.nombre }}
+                                            <span class="badge badge-light-primary ms-2">{{ subproyecto.estado }}</span>
+                                        </td>
+                                    </tr>
+                                    <ng-container *ngFor="let producto of subproyecto.productos">
+                                        <tr>
+                                            <td>
                                                 <div class="d-flex justify-content-start flex-column">
-                                                    <a href="#" class="text-gray-900 fw-bold text-hover-primary mb-1 fs-6">{{ DETAIL_PROFORMA.product.title }}</a>
+                                                    <span class="text-gray-900 fw-bold text-hover-primary mb-1 fs-6">{{ producto.product.title }}</span>
                                                 </div>
-                                            </div>
-                                        </td>
-                                        
-                                        <td>
-                                            <span class="text-muted fw-semibold text-muted d-block fs-7">{{ DETAIL_PROFORMA.product_categorie.name }}</span>
-                                        </td>
-    
-                                        <td>
-                                            <span class="text-muted fw-semibold text-muted d-block fs-7">{{ DETAIL_PROFORMA.unit.name }}</span>
-                                        </td>
-    
-                                        <td>
-                                            <span class="text-muted fw-semibold text-muted d-block fs-7">{{ DETAIL_PROFORMA.price_unit }} PEN</span>
-                                        </td>
-    
-                                        <td>
-                                            <span class="text-muted fw-semibold text-muted d-block fs-7">{{ DETAIL_PROFORMA.discount }} PEN</span>
-                                        </td>   
-                                        <td>
-                                            <span class="text-muted fw-semibold text-muted d-block fs-7">{{ DETAIL_PROFORMA.subtotal }} PEN</span>
-                                        </td>   
-                                        <td>
-                                            <span class="text-muted fw-semibold text-muted d-block fs-7">{{ DETAIL_PROFORMA.impuesto }} PEN</span>
-                                        </td>     
-                                        <td>
-                                            <span class="text-muted fw-semibold text-muted d-block fs-7">{{ DETAIL_PROFORMA.quantity }}</span>
-                                        </td> 
-                                        <td>
-                                            <span class="text-muted fw-semibold text-muted d-block fs-7">{{ DETAIL_PROFORMA.total }} PEN</span>
-                                        </td>   
-                                    </tr>                 
+                                            </td>
+                                            <td>
+                                                <span class="text-muted fw-semibold text-muted d-block fs-7">{{ producto.product.description || 'Sin descripción' }}</span>
+                                            </td>
+                                            <td>
+                                                <span class="text-muted fw-semibold text-muted d-block fs-7">{{ producto.unit.name }}</span>
+                                            </td>
+                                            <td>
+                                                <span class="text-muted fw-semibold text-muted d-block fs-7">{{ producto.cantidad }}</span>
+                                            </td>
+                                        </tr>
+                                    </ng-container>
                                 </ng-container>
                                 <tr>
-                                    <td></td>
-                                    <td colspan="2">Sede de ORIGEN:</td>
-                                    <td >{{ PROFORMA.sucursale.name }}</td>
-                                    <!-- <td></td> -->
-                                    <!-- <td></td> -->
-                                    <td colspan="2">Sede de ENTREGA:</td>
-                                    <td colspan="2">{{ PROFORMA.proforma_deliverie.sucursal_deliverie.name }}</td>
-                                    <!-- <td></td> -->
-                                    <!-- <td></td> -->
+                                    <td colspan="4">
+                                        <div class="d-flex justify-content-between">
+                                            <div>
+                                                <strong>Sede de ORIGEN:</strong> {{ PROFORMA.sucursale.name }}
+                                            </div>
+                                            <div>
+                                                <strong>Sede de ENTREGA:</strong> {{ PROFORMA.proforma_deliverie.sucursal_deliverie.name }}
+                                            </div>
+                                        </div>
+                                    </td>
                                 </tr>
                             </tbody>
                             <!--end::Table body-->
                         </table>
                         <!--end::Table-->
                     </div>
+                </div>
+            </div>
 
+            <!-- PDF Section -->
+            <div class="row mt-5">
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">Documentos PDF</h3>
+                    </div>
+                    <div class="card-body">
+                        <!-- Upload PDF -->
+                        <div class="mb-5">
+                            <div class="d-flex align-items-center">
+                                <input type="file" class="form-control me-3" accept=".pdf" (change)="onFileSelected($event)">
+                                <button type="button" class="btn btn-primary" (click)="uploadPdf()" [disabled]="!selectedFile">
+                                    Subir PDF
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- PDF List -->
+                        <div class="table-responsive">
+                            <table class="table table-row-bordered table-row-gray-100 align-middle gs-0 gy-3">
+                                <thead>
+                                    <tr class="fw-bold text-muted">
+                                        <th class="min-w-150px">Nombre</th>
+                                        <th class="min-w-100px">Acciones</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr *ngFor="let pdf of pdfs">
+                                        <td>{{ pdf.name }}</td>
+                                        <td>
+                                            <a [href]="pdf.url" target="_blank" class="btn btn-sm btn-light-primary me-2">
+                                                Ver
+                                            </a>
+                                            <button type="button" class="btn btn-sm btn-light-danger" (click)="deletePdf(pdf.id)">
+                                                Eliminar
+                                            </button>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
                 </div>
             </div>
 

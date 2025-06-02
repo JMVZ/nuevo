@@ -1,15 +1,16 @@
-import { Component, ElementRef, EventEmitter, Input, Output, ViewChild } from '@angular/core';
+import { Component, ElementRef, EventEmitter, Input, Output, ViewChild, OnInit } from '@angular/core';
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
 import { ToastrService } from 'ngx-toastr';
 import { fromEvent, debounceTime } from 'rxjs';
 import { ProformasService } from '../../service/proformas.service';
+import { FormsModule } from '@angular/forms';
 
 @Component({
   selector: 'app-edit-product-detail-proforma',
   templateUrl: './edit-product-detail-proforma.component.html',
   styleUrls: ['./edit-product-detail-proforma.component.scss']
 })
-export class EditProductDetailProformaComponent {
+export class EditProductDetailProformaComponent implements OnInit {
 
   @Input() DETAIL_PRODUCT:any;
   @Input() sucursale_asesor:any;
@@ -17,16 +18,16 @@ export class EditProductDetailProformaComponent {
   @Input() PROFORMA_ID:any;
 
   @Output() EditProductProforma: EventEmitter<any> = new EventEmitter();
-  price:number = 0;
-  description_product:string = '';
-  quantity_product:number = 0;
-  unidad_product:string = '';
-  almacen_product:string = '';
+  price: number = 0;
+  description_product: string = '';
+  quantity_product: number = 0;
+  unidad_product: string = '';
+  almacen_product: string = '';
   PRODUCT_SELECTED:any;
   loadUnidad:Boolean = false;
   warehouses_product:any = [];
   exits_warehouse:any = [];
-  amount_discount:number = 0;
+  amount_discount: number = 0;
 
   source: any;
   @ViewChild("discount") something:ElementRef; 

@@ -1,7 +1,7 @@
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable, BehaviorSubject, finalize } from 'rxjs';
-import { URL_SERVICIOS } from 'src/app/config/config';
+import { environment } from 'src/environments/environment';
 import { AuthService } from '../../auth';
 
 @Injectable({
@@ -23,8 +23,7 @@ export class CajaEgresoService {
   registerEgreso(data:any) {
     this.isLoadingSubject.next(true);
     let headers = new HttpHeaders({'Authorization': 'Bearer '+ this.authservice.token});
-    let URL = URL_SERVICIOS+"/caja/egresos";
-    return this.http.post(URL,data,{headers: headers}).pipe(
+    return this.http.post(`${environment.apiUrl}/caja/egresos`, data, {headers: headers}).pipe(
       finalize(() => this.isLoadingSubject.next(false))
     );
   }
@@ -32,8 +31,7 @@ export class CajaEgresoService {
   listEgresos(page = 1,caja_sucursale_id:string = ''){
     this.isLoadingSubject.next(true);
     let headers = new HttpHeaders({'Authorization': 'Bearer '+ this.authservice.token});
-    let URL = URL_SERVICIOS+"/caja/egresos?page="+page+"&caja_sucursale_id="+caja_sucursale_id;
-    return this.http.get(URL,{headers: headers}).pipe(
+    return this.http.get(`${environment.apiUrl}/caja/egresos?page=${page}&caja_sucursale_id=${caja_sucursale_id}`, {headers: headers}).pipe(
       finalize(() => this.isLoadingSubject.next(false))
     );
   }
@@ -41,7 +39,7 @@ export class CajaEgresoService {
   updateEgreso(ID_EGRESO:string,data:any) {
     this.isLoadingSubject.next(true);
     let headers = new HttpHeaders({'Authorization': 'Bearer '+ this.authservice.token});
-    let URL = URL_SERVICIOS+"/caja/egresos/"+ID_EGRESO;
+    let URL = `${environment.apiUrl}/caja/egresos/${ID_EGRESO}`;
     return this.http.put(URL,data,{headers: headers}).pipe(
       finalize(() => this.isLoadingSubject.next(false))
     );
@@ -50,7 +48,7 @@ export class CajaEgresoService {
   deleteEgreso(ID_EGRESO:string) {
     this.isLoadingSubject.next(true);
     let headers = new HttpHeaders({'Authorization': 'Bearer '+ this.authservice.token});
-    let URL = URL_SERVICIOS+"/caja/egresos/"+ID_EGRESO;
+    let URL = `${environment.apiUrl}/caja/egresos/${ID_EGRESO}`;
     return this.http.delete(URL,{headers: headers}).pipe(
       finalize(() => this.isLoadingSubject.next(false))
     );

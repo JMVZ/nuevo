@@ -1,0 +1,59 @@
+/* Estilos para salidas de productos */
+
+.form-control {
+  background-color: #f8f9fa;
+  border: 1px solid #dee2e6;
+  color: #495057;
+  
+  &:focus {
+    background-color: #fff;
+    border-color: #80bdff;
+    box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+  }
+}
+
+.list-group-item {
+  background-color: #f8f9fa;
+  border: 1px solid #dee2e6;
+  color: #495057;
+  
+  &:hover {
+    background-color: #e9ecef;
+  }
+}
+
+.zindex-dropdown {
+  z-index: 1000;
+}
+
+.suggestions-container {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background: white;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    max-height: 200px;
+    overflow-y: auto;
+    z-index: 1000;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.suggestion-item {
+    padding: 8px 12px;
+    cursor: pointer;
+    border-bottom: 1px solid #eee;
+    
+    &:hover {
+        background-color: #f8f9fa;
+    }
+    
+    &:last-child {
+        border-bottom: none;
+    }
+}
+
+.position-relative {
+    position: relative;
+} 

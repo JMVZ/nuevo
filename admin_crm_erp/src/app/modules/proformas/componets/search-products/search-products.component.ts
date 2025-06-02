@@ -41,7 +41,7 @@ export class SearchProductsComponent {
         TEXTO = "Tax Free"
         break;
         case 2:
-          TEXTO = "Taxable Goods"
+          TEXTO = "IVA"
           break;
           case 3:
         TEXTO = "Downloadable Product"

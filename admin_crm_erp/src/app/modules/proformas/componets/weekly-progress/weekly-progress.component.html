@@ -1,0 +1,141 @@
+<div class="modal-content p-0 border-0 shadow-lg rounded-4 overflow-hidden">
+    <!-- Header -->
+    <div class="modal-header bg-white text-dark py-4 px-4 border-0 align-items-center shadow-sm">
+        <div class="d-flex align-items-center">
+            <i class="ki-duotone ki-calendar-tick fs-1 me-3 text-dark opacity-75"></i>
+            <div>
+                <div class="fs-4 fw-bold">Seguimiento Semanal</div>
+                <div class="fs-7 text-muted">{{proforma.final_product_title}}</div>
+            </div>
+        </div>
+        <button type="button" class="btn btn-icon btn-light btn-sm ms-2 border-0 bg-white text-muted" aria-label="Cerrar" (click)="modal.dismiss()">
+            <i class="ki-duotone ki-cross fs-2"></i>
+        </button>
+    </div>
+
+    <!-- Body -->
+    <div class="modal-body bg-light px-4 py-4">
+        <div class="table-responsive">
+            <table class="table table-borderless rounded-3 shadow-sm overflow-hidden mb-0">
+                <thead>
+                    <tr class="bg-white text-primary fw-bold fs-7">
+                        <th class="ps-3"><i class="ki-duotone ki-calendar fs-2 me-2"></i>Semana</th>
+                        <th><i class="ki-duotone ki-task fs-2 me-2"></i>Actividades</th>
+                        <th><i class="ki-duotone ki-document fs-2 me-2"></i>Notas</th>
+                        <th><i class="ki-duotone ki-gear fs-2 me-2"></i>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr *ngFor="let week of weeks; let idx = index" [ngClass]="{'bg-white': idx%2===0, 'bg-light': idx%2!==0}">
+                        <td class="ps-3 align-middle">
+                            <div class="d-flex flex-column gap-1">
+                                <span class="fw-bold fs-7 text-primary">
+                                    <i class="ki-duotone ki-calendar-8 fs-2 me-1"></i>Semana {{week.week_number}}
+                                </span>
+                                <span [ngClass]="{
+                                    'badge bg-success text-white': getWeekStatus(week)==='Completado',
+                                    'badge bg-warning text-dark': getWeekStatus(week)==='Pendiente',
+                                    'badge bg-danger text-white': getWeekStatus(week)==='Retrasado',
+                                    'badge bg-primary text-white': getWeekStatus(week)==='En curso'
+                                }" class="fs-8 px-2 py-1">
+                                    <i class="ki-duotone ki-check fs-2 me-1"></i>{{getWeekStatus(week)}}
+                                </span>
+                                <span class="badge bg-primary bg-opacity-10 text-primary border border-primary fs-8">
+                                    <i class="ki-duotone ki-calendar-8 fs-2 me-1"></i>
+                                    {{week.start_date | date:'dd/MM/yyyy'}} - {{week.end_date | date:'dd/MM/yyyy'}}
+                                </span>
+                            </div>
+                        </td>
+                        <td class="align-middle">
+                            <div *ngIf="canAddActivity(week)">
+                                <button class="btn btn-sm w-100 mb-2 btn-primary text-white shadow-sm fw-semibold d-flex align-items-center justify-content-center gap-2 hover-elevate-up transition" (click)="addActivity(week)">
+                                    <i class="ki-duotone ki-plus fs-2"></i>Agregar Actividad
+                                </button>
+                            </div>
+                            <div *ngFor="let activity of week.activities; let i = index" class="mb-2">
+                                <div class="input-group rounded-3 shadow-sm">
+                                    <input type="text" class="form-control form-control-sm bg-white text-dark border-0 rounded-start-3"
+                                           [(ngModel)]="activity.description"
+                                           [disabled]="!canEditWeek(week)"
+                                           placeholder="Ingrese la actividad..." />
+                                    <button class="btn btn-sm btn-danger text-white rounded-end-3 px-3 hover-elevate-up transition"
+                                            (click)="removeActivity(week, i)"
+                                            *ngIf="canEditWeek(week)"
+                                            title="Eliminar tarea">
+                                        <i class="ki-duotone ki-trash fs-2"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            <div *ngIf="!canAddActivity(week)" class="alert alert-warning d-flex align-items-center gap-2 py-2 px-3 mt-2 mb-0 rounded-3 border border-warning bg-warning bg-opacity-10">
+                                <i class="ki-duotone ki-warning fs-2 text-warning"></i>
+                                <span class="fs-8">
+                                    <ng-container *ngIf="week.activities.length >= MAX_ACTIVITIES">
+                                        Máximo de actividades alcanzado (8)
+                                    </ng-container>
+                                    <ng-container *ngIf="week.is_future_week">
+                                        <span class="text-danger fw-bold">No se pueden agregar actividades a semanas futuras</span>
+                                    </ng-container>
+                                </span>
+                            </div>
+                        </td>
+                        <td class="align-middle">
+                            <button class="btn btn-sm w-100 btn-primary text-white shadow-sm fw-semibold d-flex align-items-center justify-content-center gap-2 hover-elevate-up transition"
+                                    (click)="openNotesModal(week)"
+                                    [disabled]="!canEditWeek(week)">
+                                <i class="ki-duotone ki-document fs-2"></i>Ver Notas
+                            </button>
+                        </td>
+                        <td class="align-middle">
+                            <button class="btn btn-sm w-100 btn-primary text-white shadow-sm fw-semibold d-flex align-items-center justify-content-center gap-2 hover-elevate-up transition"
+                                    (click)="updateProgress(week)"
+                                    [disabled]="!canEditWeek(week)">
+                                <i class="ki-duotone ki-check fs-2"></i>Guardar
+                            </button>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <div class="modal-footer bg-white border-0 py-3 px-4 d-flex justify-content-end gap-2">
+        <button type="button" class="btn btn-light shadow-sm d-flex align-items-center gap-2 hover-elevate-up transition" (click)="modal.dismiss()">
+            <i class="ki-duotone ki-cross fs-2"></i>Cerrar
+        </button>
+    </div>
+</div>
+
+<!-- Modal de Notas -->
+<ng-template #notesModal>
+    <div class="modal-content bg-white text-dark rounded-4 shadow-lg border-0">
+        <div class="modal-header bg-white text-dark py-3 border-0 rounded-top-4">
+            <h5 class="modal-title d-flex align-items-center gap-2">
+                <i class="ki-duotone ki-document fs-2 text-dark"></i>
+                <span class="fw-bold">Notas de la Semana {{selectedWeek?.week_number}}</span>
+            </h5>
+            <button type="button" class="btn btn-icon btn-light btn-sm ms-2 border-0 bg-white text-muted" aria-label="Cerrar" (click)="closeNotesModal()">
+                <i class="ki-duotone ki-cross fs-2"></i>
+            </button>
+        </div>
+        <div class="modal-body py-4 px-4">
+            <div *ngIf="selectedWeek">
+                <textarea class="form-control bg-light text-dark border-0 rounded-3 shadow-sm"
+                          [(ngModel)]="selectedWeek.notes"
+                          rows="5"
+                          placeholder="Ingrese notas sobre la semana..."
+                          [disabled]="!canEditWeek(selectedWeek)"></textarea>
+            </div>
+        </div>
+        <div class="modal-footer bg-white border-0 py-3 px-4 d-flex justify-content-end gap-2 rounded-bottom-4">
+            <button type="button" class="btn btn-light shadow-sm d-flex align-items-center gap-2 hover-elevate-up transition" (click)="closeNotesModal()">
+                <i class="ki-duotone ki-cross fs-2"></i>Cerrar
+            </button>
+            <button type="button" class="btn btn-primary text-white shadow-sm d-flex align-items-center gap-2 hover-elevate-up transition"
+                    (click)="saveNotes()"
+                    [disabled]="!selectedWeek || !canEditWeek(selectedWeek)">
+                <i class="ki-duotone ki-check fs-2"></i>Guardar
+            </button>
+        </div>
+    </div>
+</ng-template>

@@ -1,0 +1,130 @@
+.reports-container {
+  padding: 20px;
+
+  .reports-header {
+    margin-bottom: 20px;
+
+    h1 {
+      margin-bottom: 20px;
+      color: #333;
+    }
+
+    .tabs {
+      display: flex;
+      gap: 10px;
+      border-bottom: 1px solid #ddd;
+      padding-bottom: 10px;
+
+      button {
+        padding: 10px 20px;
+        border: none;
+        background: none;
+        cursor: pointer;
+        font-size: 16px;
+        color: #666;
+        transition: all 0.3s ease;
+
+        &:hover {
+          color: #333;
+        }
+
+        &.active {
+          color: #2196f3;
+          border-bottom: 2px solid #2196f3;
+        }
+      }
+    }
+  }
+
+  .reports-content {
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    padding: 20px;
+  }
+
+  .tabs-container {
+    margin-bottom: 20px;
+
+    .nav-tabs {
+      border-bottom: 2px solid #e9ecef;
+
+      .nav-item {
+        margin-bottom: -2px;
+
+        .nav-link {
+          color: #6c757d;
+          border: none;
+          padding: 10px 20px;
+          cursor: pointer;
+          transition: all 0.3s ease;
+
+          &:hover {
+            color: #3498db;
+            border: none;
+          }
+
+          &.active {
+            color: #3498db;
+            border: none;
+            border-bottom: 2px solid #3498db;
+            font-weight: 500;
+          }
+        }
+      }
+    }
+  }
+
+  .tab-content {
+    background: #fff;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+  }
+}
+
+.card {
+  margin: 20px;
+  box-shadow: 0 0 20px rgba(76, 87, 125, 0.02);
+}
+
+.card-header {
+  background-color: #f5f8fa;
+  border-bottom: 1px solid #eff2f5;
+  padding: 1.5rem;
+}
+
+.card-title {
+  margin: 0;
+  color: #181c32;
+  font-weight: 500;
+  font-size: 1.275rem;
+}
+
+.nav-tabs {
+  border-bottom: 1px solid #eff2f5;
+}
+
+.nav-tabs .nav-link {
+  color: #7e8299;
+  font-weight: 500;
+  padding: 0.75rem 1.5rem;
+  border: none;
+  border-bottom: 2px solid transparent;
+  transition: all 0.3s ease;
+}
+
+.nav-tabs .nav-link:hover {
+  color: #181c32;
+  border-bottom-color: #e4e6ef;
+}
+
+.nav-tabs .nav-link.active {
+  color: #009ef7;
+  border-bottom-color: #009ef7;
+  background-color: transparent;
+}
+
+.tab-content {
+  padding: 1.5rem 0;
+} 

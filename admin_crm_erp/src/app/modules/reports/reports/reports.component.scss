@@ -1,0 +1,120 @@
+.card {
+  margin: 20px;
+  box-shadow: 0 0 20px rgba(0, 0, 0, 0.2);
+  border-radius: 0.475rem;
+  background-color: #1e1e2d;
+  border: 1px solid #323248;
+}
+
+.card-header {
+  background-color: #1b1b28;
+  border-bottom: 1px solid #323248;
+  padding: 1.5rem;
+  border-radius: 0.475rem 0.475rem 0 0;
+}
+
+.card-title {
+  margin: 0;
+  color: #ffffff;
+  font-weight: 500;
+  font-size: 1.275rem;
+
+  h2 {
+    margin: 0;
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: #ffffff;
+  }
+}
+
+.reports-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 1.5rem;
+  padding: 1rem;
+}
+
+.report-card {
+  background-color: #1b1b28;
+  border: 1px solid #323248;
+  border-radius: 0.475rem;
+  padding: 2rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 1rem;
+
+  &:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+    border-color: #3699ff;
+
+    .report-icon i {
+      color: #3699ff;
+    }
+  }
+
+  .report-icon {
+    width: 80px;
+    height: 80px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: #1e1e2d;
+    border-radius: 50%;
+    margin-bottom: 1rem;
+
+    i {
+      color: #9899ac;
+      transition: all 0.3s ease;
+    }
+  }
+
+  .report-info {
+    .report-title {
+      color: #ffffff;
+      font-size: 1.25rem;
+      font-weight: 600;
+      margin-bottom: 0.5rem;
+    }
+
+    .report-description {
+      color: #9899ac;
+      font-size: 0.95rem;
+      margin: 0;
+    }
+  }
+}
+
+.report-content {
+  background-color: #1b1b28;
+  border: 1px solid #323248;
+  border-radius: 0.475rem;
+  padding: 2rem;
+
+  .report-content-title {
+    color: #ffffff;
+    font-size: 1.5rem;
+    font-weight: 600;
+    margin: 0;
+    display: flex;
+    align-items: center;
+
+    i {
+      cursor: pointer;
+      color: #9899ac;
+      transition: all 0.3s ease;
+
+      &:hover {
+        color: #3699ff;
+      }
+    }
+  }
+}
+
+.cursor-pointer {
+  cursor: pointer;
+}

@@ -1,0 +1,62 @@
+<div class="card">
+  <div class="card-header">
+    <h2>Entradas de productos</h2>
+  </div>
+  <div class="card-body">
+    <form [formGroup]="formEntrada" (ngSubmit)="registrarEntrada()">
+      <div class="row mb-3">
+        <div class="col-md-6 position-relative">
+          <label for="producto">Producto</label>
+          <div class="d-flex align-items-center position-relative">
+            <i class="ki-duotone ki-magnifier fs-3 position-absolute ms-4">
+              <span class="path1"></span>
+              <span class="path2"></span>
+            </i>
+            <input type="text" 
+                   class="form-control form-control-solid w-100 ps-12" 
+                   id="producto" 
+                   formControlName="producto" 
+                   [(ngModel)]="searchTerm"
+                   placeholder="Buscar producto..."
+                   (keyup.enter)="searchProducts()">
+          </div>
+        </div>
+        <div class="col-md-3">
+          <label>Cantidad a ingresar</label>
+          <input type="number" class="form-control" formControlName="cantidad" min="1">
+        </div>
+      </div>
+      <div class="row mb-3">
+        <div class="col-md-3">
+          <label>Unidad</label>
+          <select class="form-select" formControlName="unidad">
+            <option value="">Selecciona una unidad</option>
+            <option *ngFor="let unidad of unidades" [value]="unidad.id">
+              {{unidad.name}}
+            </option>
+          </select>
+        </div>
+        <div class="col-md-3">
+          <label>Almacén</label>
+          <select class="form-select" formControlName="almacen">
+            <option value="">Selecciona un almacén</option>
+            <option *ngFor="let almacen of almacenes" [value]="almacen.id">
+              {{almacen.name}}
+            </option>
+          </select>
+        </div>
+        <div class="col-md-6 d-flex align-items-end">
+          <button type="submit" class="btn btn-primary" [disabled]="formEntrada.invalid || isLoading">
+            <span *ngIf="isLoading" class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+            Registrar Entrada
+          </button>
+        </div>
+      </div>
+    </form>
+
+    <div *ngIf="mensaje" id="mensaje-entrada" class="alert mt-3 fade show" [ngClass]="{'alert-success': tipoMensaje==='success', 'alert-danger': tipoMensaje==='danger'}">
+      <span [innerHTML]="mensaje"></span>
+      <button type="button" class="btn-close" (click)="mensaje = ''"></button>
+    </div>
+  </div>
+</div> 

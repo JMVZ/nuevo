@@ -1,0 +1,20 @@
+// Estilos para el componente de subproyectos 
+
+.cursor-pointer {
+  cursor: pointer;
+  
+  &:hover {
+    background-color: #f8f9fa;
+  }
+}
+
+// Estilo para las badges en el modal
+.badge {
+  &.badge-success {
+    background-color: #28a745;
+  }
+  
+  &.badge-danger {
+    background-color: #dc3545;
+  }
+} 

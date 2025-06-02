@@ -6,7 +6,7 @@
             <!--begin::Page title-->
             <div class="page-title d-flex flex-column justify-content-center flex-wrap me-3">
                 <!--begin::Title-->
-                <h1 class="page-heading d-flex text-gray-900 fw-bold fs-3 flex-column justify-content-center my-0">Editar Product: "{{ PRODUCT_SELECTED.title }}"</h1>
+                <h1 class="page-heading d-flex text-gray-900 fw-bold fs-3 flex-column justify-content-center my-0" *ngIf="PRODUCT_SELECTED">Editar Product: "{{ PRODUCT_SELECTED?.title }}"</h1>
                 <!--end::Title-->
             </div>
             <!--end::Page title-->
@@ -203,7 +203,7 @@
                                         <!--begin::Input group-->
                                         <div>
                                             <!--begin::Label-->
-                                            <label class="form-label">Description</label>
+                                            <label class="required form-label">Descripción</label>
                                             <!--end::Label-->
                                             <textarea class="form-control form-control-solid" rows="3" [(ngModel)]="description" name="description" placeholder="Type Target Details"></textarea>
 
@@ -213,7 +213,7 @@
 
                                         <div class="row">
                                             <div class="col-4">
-                                                <label class="required form-label">Proveedor: (Opcional)</label>
+                                                <label class="form-label">Proveedor: (Opcional)</label>
                                                 <select class="form-select mb-2" [(ngModel)]="provider_id" name="provider_id">
                                                     <ng-container *ngFor="let PROVIDER of PROVIDERS">
                                                         <option [value]="PROVIDER.id" >{{ PROVIDER.full_name }}</option>
@@ -222,7 +222,7 @@
                                                 </select>
                                             </div>
                                             <div class="col-8">
-                                                <label class="required form-label">Especificaciones: (Opcional)</label>
+                                                <label class="form-label">Especificaciones: (Opcional)</label>
                                                 <div class="d-flex">
                                                     <input type="text" [(ngModel)]="key_v" name="key_v" class="form-control mb-2" placeholder="Propiedad" />
                                                     <input type="text" [(ngModel)]="value_v" name="value_v" class="form-control mb-2" placeholder="Valor" />
@@ -289,7 +289,7 @@
                                         <div class="mb-10 row fv-row">
                                             <div class="col-4">
                                                 <!--begin::Label-->
-                                                <label class="required form-label">Base Price</label>
+                                                <label class="form-label">Base Price</label>
                                                 <!--end::Label-->
                                                 <!--begin::Input-->
                                                 <input type="number" [(ngModel)]="price_general" name="price_general" class="form-control mb-2" placeholder="Product price" />
@@ -299,7 +299,7 @@
                                                 <!--end::Description-->
                                             </div>
                                             <div class="col-4">
-                                                <label class="required form-label">Disponibilidad</label>
+                                                <label class="form-label">Disponibilidad</label>
                                                 <select class="form-select mb-2" [(ngModel)]="disponiblidad" name="disponiblidad">
                                                     <option value="1" selected="selected">Vender los productos sin stock</option>
                                                     <option value="2">No vender los productos sin stock </option>
@@ -307,7 +307,7 @@
                                                 </select>
                                             </div>
                                             <div class="col-4">
-                                                <label class="required form-label">Tiempo de abastecimiento</label>
+                                                <label class="form-label">Tiempo de abastecimiento</label>
                                                 <input type="number" [(ngModel)]="tiempo_de_abastecimiento" name="tiempo_de_abastecimiento" class="form-control mb-2" placeholder="Product price" />
                                             </div>
                                         </div>
@@ -398,12 +398,12 @@
                                             <!--begin::Input group-->
                                             <div class="fv-row w-100 flex-md-root">
                                                 <!--begin::Label-->
-                                                <label class="required form-label">Tax Class</label>
+                                                <label class="required form-label">Impuesto</label>
                                                 <!--end::Label-->
                                                 <!--begin::Select2-->
                                                 <select class="form-select mb-2" [(ngModel)]="tax_selected" name="tax_selected" data-control="select2" data-hide-search="true" data-placeholder="Select an option">
                                                     <option value="1">Tax Free</option>
-                                                    <option value="2">Taxable Goods</option>
+                                                    <option value="2">IVA</option>
                                                     <option value="3">Downloadable Product</option>
                                                 </select>
                                                 <!--end::Select2-->
@@ -480,7 +480,7 @@
                                         <div class="mb-10 fv-row row">
                                             <div class="col-6">
                                                 <!--begin::Label-->
-                                                <label class="required form-label">UMBRAL</label>
+                                                <label class="form-label">UMBRAL</label>
                                                 <!--end::Label-->
                                                 <!--begin::Input-->
                                                 <input type="text" [(ngModel)]="umbral" name="umbral" class="form-control mb-2" placeholder="SKU Number" />
@@ -508,7 +508,7 @@
                                             <div class="col-4">
                                                 <!--begin::Label-->
 
-                                                <label class="required form-label">Unidad</label>
+                                                <label class="form-label">Unidad</label>
                                                 <!--end::Label-->
                                                 <!--begin::Select2-->
                                                 <select class="form-select mb-2" [(ngModel)]="unit_warehouse" name="unit_warehouse" placeholder="Select an option">
@@ -523,7 +523,7 @@
                                             </div>
                                             <div class="col-4">
                                                 <!--begin::Label-->
-                                                <label class="required form-label">Almacen</label>
+                                                <label class="form-label">Almacen</label>
                                                 <!--end::Label-->
                                                 <!--begin::Select2-->
                                                 <select class="form-select mb-2" [(ngModel)]="almacen_warehouse" name="almacen_warehouse" placeholder="Select an option">
@@ -538,7 +538,7 @@
                                             </div>
                                             <div class="col-3">
                                                 <!--begin::Label-->
-                                                <label class="required form-label">Quantity</label>
+                                                <label class="form-label">Quantity</label>
                                                 <!--end::Label-->
                                                 <!--begin::Input-->
                                                 <div class="d-flex gap-3">
@@ -779,7 +779,7 @@
                                             <div class="mb-10 fv-row row">
                                                 <div class="col-3">
                                                     <!--begin::Label-->
-                                                    <label class="form-label">Weight</label>
+                                                    <label class="required form-label">Peso</label>
                                                     <!--end::Label-->
                                                     <!--begin::Editor-->
                                                     <input type="text" [(ngModel)]="weight" name="weight" name="weight" class="form-control mb-2" placeholder="Product weight" />
@@ -790,7 +790,7 @@
                                                 </div>
                                                 <div class="col-3">
                                                     <!--begin::Label-->
-                                                    <label class="form-label">Ancho</label>
+                                                    <label class="required form-label">Ancho</label>
                                                     <!--end::Label-->
                                                     <!--begin::Input-->
                                                     <div class="d-flex flex-wrap flex-sm-nowrap gap-3">
@@ -801,7 +801,7 @@
                                                 </div>
                                                 <div class="col-3">
                                                     <!--begin::Label-->
-                                                    <label class="form-label">Alto</label>
+                                                    <label class="required form-label">Alto</label>
                                                     <!--end::Label-->
                                                     <!--begin::Input-->
                                                     <div class="d-flex flex-wrap flex-sm-nowrap gap-3">
@@ -812,7 +812,7 @@
                                                 </div>
                                                 <div class="col-3">
                                                     <!--begin::Label-->
-                                                    <label class="form-label">Largo</label>
+                                                    <label class="required form-label">Largo</label>
                                                     <!--end::Label-->
                                                     <!--begin::Input-->
                                                     <div class="d-flex flex-wrap flex-sm-nowrap gap-3">

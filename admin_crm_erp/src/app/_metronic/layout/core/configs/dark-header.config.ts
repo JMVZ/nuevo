@@ -129,7 +129,7 @@ export const DarkHeaderConfig: ILayout = {
   engage: {
     componentName: 'engage',
     demos: {
-      enabled: true,
+      enabled: false,
     },
     purchase: {
       enabled: false,

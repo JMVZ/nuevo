@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, ChangeDetectorRef, NgZone } from '@angular/core';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { CajaService } from '../service/caja.service';
 import { CajaAperturaComponent } from '../caja-apertura/caja-apertura.component';
@@ -16,6 +16,7 @@ import { CajaEgresoService } from '../service/caja-egreso.service';
 import { CajaEgresoEditComponent } from '../caja-egreso-create/caja-egreso-edit/caja-egreso-edit.component';
 import { CajaEgresoDeleteComponent } from '../caja-egreso-create/caja-egreso-delete/caja-egreso-delete.component';
 import { isPermission } from 'src/app/config/config';
+import { ToastrService } from 'ngx-toastr';
 
 @Component({
   selector: 'app-lists-caja-process',
@@ -24,7 +25,6 @@ import { isPermission } from 'src/app/config/config';
 })
 export class ListsCajaProcessComponent {
 
-  sucursale_id:string = '1';
   PROFORMAS:any = [];
   isLoading$:any;
 
@@ -36,25 +36,25 @@ export class ListsCajaProcessComponent {
   caja:any;
   caja_sucursale:any;
   created_at_apertura:string = '';
-  sucursales:any = [];
   method_payments:any = [];
 
   ingresos:any = [];
   egresos:any = [];
+
   constructor(
     public modalService: NgbModal,
     public cajaService: CajaService,
     public cajaIngreso: CajaIngresoService,
     public cajaEgreso: CajaEgresoService,
+    private cdr: ChangeDetectorRef,
+    private ngZone: NgZone,
+    private toast: ToastrService
   ) {
     
   }
 
   ngOnInit(): void {
-    //Called after the constructor, initializing input properties, and the first call to ngOnChanges.
-    //Add 'implements OnInit' to the class.
     this.isLoading$ = this.cajaService.isLoading$;
-    this.sucursale_id = this.cajaService.authservice.user.sucursale_id;
     this.configCaja();
   }
 
@@ -62,48 +62,59 @@ export class ListsCajaProcessComponent {
     this.PROFORMAS = [];
     this.egresos = [];
     this.ingresos = [];
-    this.cajaService.configCaja(this.sucursale_id).subscribe((resp:any) => {
-      console.log(resp);
-      this.caja = resp.caja
-      this.caja_sucursale = resp.caja_sucursale;
-      if(this.caja_sucursale){
-        if(this.isPermission('record_contract_process')){
-          this.listProformasProcess();
-        }
+    
+    this.cajaService.configCaja().subscribe({
+      next: (resp:any) => {
+        this.ngZone.run(() => {
+          if (!resp || !resp.caja) {
+            console.error('No se pudo obtener la configuración de la caja');
+            this.toast.error("Error", "No se pudo obtener la configuración de la caja. Por favor, verifica que tengas una sucursal asignada.");
+            return;
+          }
+          this.caja = resp.caja;
+          this.caja_sucursale = resp.caja_sucursale;
+          if(this.caja_sucursale){
+            if(this.isPermission('record_contract_process')){
+              this.listProformasProcess();
+            }
 
-        if(this.isPermission('ingreso')){
-          this.listIngresos();
-        }
-        if(this.isPermission('egreso')){
-          this.listEgresos();
-        }
+            if(this.isPermission('ingreso')){
+              this.listIngresos();
+            }
+            if(this.isPermission('egreso')){
+              this.listEgresos();
+            }
+          }
+          this.created_at_apertura = resp.created_at_apertura;
+          this.method_payments = resp.method_payments;
+          this.cdr.detectChanges();
+        });
+      },
+      error: (error) => {
+        console.error('Error al configurar caja:', error);
+        this.ngZone.run(() => {
+          this.toast.error("Error", "No se pudo obtener la configuración de la caja. Por favor, verifica tu conexión y permisos.");
+          this.cdr.detectChanges();
+        });
       }
-      this.created_at_apertura = resp.created_at_apertura;
-      if(this.sucursales.length == 0){
-        this.sucursales = resp.sucursales;
-      }
-      this.method_payments = resp.method_payments;
-    })
-  }
-
-  changeSucursale($event:any){
-    this.configCaja();
-  }
-  isLoadingProcess(){
-    this.cajaService.isLoadingSubject.next(true);
-    setTimeout(() => {
-      this.cajaService.isLoadingSubject.next(false);
-    }, 50);
+    });
   }
 
   openCaja(){
+    if (!this.caja) {
+      console.error('No hay caja disponible');
+      return;
+    }
+
     const modalRef = this.modalService.open(CajaAperturaComponent,{centered:true,size: 'md'});
     modalRef.componentInstance.caja = this.caja;
 
     modalRef.componentInstance.caja_apertura.subscribe((resp:any) => {
-      this.caja_sucursale = resp.caja_sucursale;
-      this.created_at_apertura = resp.created_at_apertura;
-    })
+      this.ngZone.run(() => {
+        this.configCaja();
+        this.cdr.detectChanges();
+      });
+    });
   }
 
   validationPay(){
@@ -126,7 +137,6 @@ export class ListsCajaProcessComponent {
 
   openHistory(){
     const modalRef = this.modalService.open(CajaHistoryComponent,{centered:true,size: 'xl'});
-    modalRef.componentInstance.sucursales = this.sucursales;
   }
 
   closeCaja(){
@@ -143,16 +153,19 @@ export class ListsCajaProcessComponent {
   }
 
   listProformasProcess(){
-    // PROFORMAS
     let data = {
       caja_sucursale_id: this.caja_sucursale.id,
       n_proforma: this.search,
       search_client: this.search_client,
     }
-    this.cajaService.listContractProcess(data).subscribe((resp:any) => {
-      console.log(resp);
-      this.PROFORMAS = resp.contract_process.data;
-    })
+    this.cajaService.listContractProcess(data).subscribe({
+      next: (resp:any) => {
+        this.ngZone.run(() => {
+          this.PROFORMAS = resp.contract_process.data;
+          this.cdr.detectChanges();
+        });
+      }
+    });
   }
   resetlistProformasProcess(){
     this.search = '';
@@ -166,10 +179,14 @@ export class ListsCajaProcessComponent {
   }
 
   listIngresos(){
-    this.cajaIngreso.listIngresos(1,this.caja_sucursale.id).subscribe((resp:any) => {
-      console.log(resp);
-      this.ingresos = resp.ingresos;
-    })
+    this.cajaIngreso.listIngresos(1,this.caja_sucursale.id).subscribe({
+      next: (resp:any) => {
+        this.ngZone.run(() => {
+          this.ingresos = resp.ingresos;
+          this.cdr.detectChanges();
+        });
+      }
+    });
   }
 
   addIngreso(){
@@ -213,10 +230,14 @@ export class ListsCajaProcessComponent {
 
 
   listEgresos(){
-    this.cajaEgreso.listEgresos(1,this.caja_sucursale.id).subscribe((resp:any) => {
-      console.log(resp);
-      this.egresos = resp.egresos;
-    })
+    this.cajaEgreso.listEgresos(1,this.caja_sucursale.id).subscribe({
+      next: (resp:any) => {
+        this.ngZone.run(() => {
+          this.egresos = resp.egresos;
+          this.cdr.detectChanges();
+        });
+      }
+    });
   }
 
   addEgreso(){
@@ -260,7 +281,28 @@ export class ListsCajaProcessComponent {
 
   }
 
+  isLoadingProcess(){
+    this.cajaService.isLoadingSubject.next(true);
+    setTimeout(() => {
+      this.cajaService.isLoadingSubject.next(false);
+    }, 50);
+  }
+
   isPermission(permission:string){
     return isPermission(permission);
+  }
+
+  changeTypeOption() {
+    switch(this.type_option_selected) {
+      case 1:
+        this.listProformasProcess();
+        break;
+      case 2:
+        this.listIngresos();
+        break;
+      case 3:
+        this.listEgresos();
+        break;
+    }
   }
 }

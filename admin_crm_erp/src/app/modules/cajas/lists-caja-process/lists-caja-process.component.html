@@ -35,18 +35,13 @@
                         Cierre de caja</button>
                 </div>
                 <div class="col-2">
-                    <select
-                        class="form-control"
-                        name="sucursale_id"
-                        [(ngModel)]="sucursale_id"
-                        placeholder="Selec. Sucursal"
-                        (change)="changeSucursale($event)"
-                    >
-                        <ng-container *ngFor="let sucursal of sucursales">
-                            <option [value]="sucursal.id">{{ sucursal.name }}</option>
-                        </ng-container>
-                    </select>
-                    <!-- <div class="text-muted fs-7">Ver caja.</div> -->
+                    <div class="input-group input-group-solid">
+                        <select class="form-select form-select-solid" [(ngModel)]="type_option_selected" (change)="changeTypeOption()">
+                            <option [value]="1">Proformas</option>
+                            <option [value]="2">Ingresos</option>
+                            <option [value]="3">Egresos</option>
+                        </select>
+                    </div>
                 </div>
                 <div class="separator separator-dashed my-6"></div>
                 <div class="col-12">
@@ -93,49 +88,6 @@
     <div class="card-body pt-0">
 
         <ng-container *ngIf="type_option_selected == 1">
-            <div class="row align-items-center">
-                <div class="col-2">
-                    <div class="d-flex align-items-center position-relative my-1">
-                        <i class="ki-duotone ki-magnifier fs-3 position-absolute ms-5"><span class="path1"></span><span
-                                class="path2"></span></i> <input type="text" [(ngModel)]="search" (keyup.enter)="listProformasProcess()" name="search" data-kt-customer-table-filter="search"
-                            class="form-control form-control-solid ps-12" placeholder="(N°) Proforma ">
-                    </div>
-                </div>
-                <div class="col-3">
-                    <div class="d-flex align-items-center position-relative my-1">
-                        <i class="ki-duotone ki-magnifier fs-3 position-absolute ms-5"><span class="path1"></span><span
-                                class="path2"></span></i> <input type="text" [(ngModel)]="search_client" (keyup.enter)="listProformasProcess()" name="search" data-kt-customer-table-filter="search"
-                            class="form-control form-control-solid ps-12" placeholder="Cliente">
-                    </div>
-                </div>
-                <!-- <div class="col-2">
-                    <div class="input-group input-group-solid">
-                        <input type="date"
-                        class="form-control form-control-lg form-control-solid"
-                        [(ngModel)]="start_date"
-                        />
-                      </div>
-                      <div class="text-muted fs-7">Fecha de inicio.</div>
-                </div>
-                <div class="col-2">
-                    <div class="input-group input-group-solid">
-                        <input type="date"
-                        class="form-control form-control-lg form-control-solid"
-                        [(ngModel)]="end_date"
-                        />
-                      </div>
-                      <div class="text-muted fs-7">Fecha fin.</div>
-                </div> -->
-                <div class="col-3 d-flex">
-                    <button class="btn btn-primary btn-sm mx-1" placement="top-start" ngbTooltip="Buscar" (click)="listProformasProcess()">
-                        <i class="ki-duotone ki-magnifier fs-2"><span class="path1"></span><span class="path2"></span></i> 
-                    </button>
-                    <button class="btn btn-dark btn-sm mx-1" placement="top-start" ngbTooltip="Limpiar"  (click)="resetlistProformasProcess()">
-                        <i class="ki-duotone ki-loading fs-2"><span class="path1"></span><span class="path2"></span></i> 
-                    </button>
-                </div>
-            </div>
-    
             <!--begin::Table-->
             <div id="kt_customers_table_wrapper" class="dt-container dt-bootstrap5 dt-empty-footer">
                 <div id="" class="table-responsive">
@@ -219,7 +171,7 @@
                                     </td>
                                     
                                     <td>
-                                        {{ PROFORMA.proforma.total }} PEN
+                                        {{ PROFORMA.proforma.total }} MXN
                                     </td>
         
                                     <td >
@@ -235,11 +187,11 @@
     
     
                                     <td>
-                                        {{ PROFORMA.proforma.debt }} PEN
+                                        {{ PROFORMA.proforma.debt }} MXN
                                     </td>
     
                                     <td style="background-color: #ffdca5;">
-                                        {{ PROFORMA.amount }} PEN
+                                        {{ PROFORMA.amount }} MXN
                                     </td>
     
                                     
@@ -321,7 +273,7 @@
                                     </td>
                                     
                                     <td>
-                                        {{ ingreso.amount }} PEN
+                                        {{ ingreso.amount }} MXN
                                     </td>
     
                                     <td>
@@ -395,7 +347,7 @@
                                     </td>
                                     
                                     <td>
-                                        {{ egreso.amount }} PEN
+                                        {{ egreso.amount }} MXN
                                     </td>
     
                                     <td>

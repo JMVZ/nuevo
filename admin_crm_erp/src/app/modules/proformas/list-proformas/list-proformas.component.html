@@ -128,7 +128,7 @@
             <!--end::Search-->
         </div>
         <!--begin::Card title-->
-        <span class="spinner-border spinner-border-sm align-middle ms-2" *ngIf="isLoading$ | async"></span>
+        <span class="spinner-border spinner-border-sm align-middle ms-2" *ngIf="isLoading"></span>
         <!--begin::Card toolbar-->
     </div>
     <!--end::Card header-->
@@ -159,12 +159,7 @@
                                 class="dt-column-title" role="button">Segmento de cliente</span><span
                                 class="dt-column-order"></span></th>
 
-                                <th class="min-w-125px dt-orderable-asc dt-orderable-desc" data-dt-column="1" rowspan="1"
-                                colspan="1" aria-label="Customer Name: Activate to sort" tabindex="0"><span
-                                    class="dt-column-title" role="button">Total</span><span
-                                    class="dt-column-order"></span></th>
-
-                                <th class="min-w-125px dt-orderable-asc dt-orderable-desc" data-dt-column="1" rowspan="1"
+                            <th class="min-w-125px dt-orderable-asc dt-orderable-desc" data-dt-column="1" rowspan="1"
                                 colspan="1" aria-label="Customer Name: Activate to sort" tabindex="0"><span
                                     class="dt-column-title" role="button">Estado de la proforma</span><span
                                     class="dt-column-order"></span></th>
@@ -174,16 +169,6 @@
                                     class="dt-column-title" role="button">Estado de pago</span><span
                                     class="dt-column-order"></span></th>
 
-                            <th class="min-w-125px dt-orderable-asc dt-orderable-desc" data-dt-column="1" rowspan="1"
-                                colspan="1" aria-label="Customer Name: Activate to sort" tabindex="0"><span
-                                    class="dt-column-title" role="button">Adeudo</span><span
-                                    class="dt-column-order"></span></th>
-
-                            <th class="min-w-125px dt-orderable-asc dt-orderable-desc" data-dt-column="2" rowspan="1"
-                                colspan="1" aria-label="Email: Activate to sort" tabindex="0"><span
-                                    class="dt-column-title" role="button">Pagado</span><span
-                                    class="dt-column-order"></span></th>
-
                             <th class="min-w-125px dt-orderable-asc dt-orderable-desc" data-dt-column="5" rowspan="1"
                                 colspan="1" aria-label="Created Date: Activate to sort" tabindex="0"><span
                                     class="dt-column-title" role="button">Asesor</span><span
@@ -191,7 +176,7 @@
 
                             <th class="min-w-125px dt-orderable-asc dt-orderable-desc" data-dt-column="5" rowspan="1"
                                 colspan="1" aria-label="Created Date: Activate to sort" tabindex="0"><span
-                                    class="dt-column-title" role="button">Fecha de registro</span><span
+                                    class="dt-column-title" role="button">Título del Producto Final</span><span
                                     class="dt-column-order"></span></th>
 
                             <th class="text-end min-w-70px dt-orderable-none" data-dt-column="6" rowspan="1" colspan="1"
@@ -218,13 +203,9 @@
                                     {{ PROFORMA.client_segment.name }}
                                 </td>
                                 
-                                <td>
-                                    {{ PROFORMA.total }} PEN
-                                </td>
-    
                                 <td >
-                                    <span class="badge badge-light-primary" *ngIf="PROFORMA.state_proforma == 1">Cotización</span>
-                                    <span class="badge badge-light-danger" *ngIf="PROFORMA.state_proforma == 2">Contrato</span>
+                                    <span class="badge badge-light-warning" *ngIf="PROFORMA.state_proforma == 1">Insumos no tomados</span>
+                                    <span class="badge badge-light-success" *ngIf="PROFORMA.state_proforma == 2">Insumos ya tomados</span>
                                     </td>
 
                                 <td >
@@ -233,32 +214,40 @@
                                     <span class="badge badge-light-success" *ngIf="PROFORMA.state_payment == 3">Total</span>
                                 </td>
 
-
-                                <td>
-                                    {{ PROFORMA.debt }} PEN
-                                </td>
-
-                                <td>
-                                    {{ PROFORMA.paid_out }} PEN
-                                </td>
-
                                 <td >
                                     {{ PROFORMA.asesor.full_name }} </td>
 
                                 <td >
-                                    {{ PROFORMA.created_at }} </td>
+                                    <div class="d-flex align-items-center">
+                                        <div class="d-flex justify-content-start flex-column">
+                                            <span class="text-gray-900 fw-bold text-hover-primary mb-1 fs-6" *ngIf="PROFORMA.final_product_title">{{ PROFORMA.final_product_title }}</span>
+                                            <span class="text-muted fw-semibold text-muted d-block fs-7" *ngIf="!PROFORMA.final_product_title">No especificado</span>
+                                        </div>
+                                    </div>
+                                </td>
     
                                 <td class="d-flex">
-
+                                    <!-- Botón de PDF comentado pero manteniendo su funcionalidad
                                     <a href="#" onclick="return false;" (click)="proformaPdf(PROFORMA)" placement="top-start" ngbTooltip="Descargar en Pdf" class="btn btn-icon btn-bg-danger btn-active-color-danger btn-sm">
                                         <i class="ki-duotone ki-paper-clip fs-2 text-white"><span class="path1"></span><span class="path2"></span><span class="path3"></span><span class="path4"></span><span class="path5"></span></i>
                                     </a>
-                                    <a href="#" onclick="return false;" 
+                                    -->
+                                    <button type="button" 
                                     (click)="tomarInsumos(PROFORMA)" 
                                     placement="top-start" 
                                     ngbTooltip="Tomar Insumos" 
-                                    class="btn btn-icon btn-bg-success btn-active-color-white btn-sm mx-1">
-                                     <i class="ki-duotone ki-truck fs-2 text-white">
+                                    class="btn btn-icon btn-bg-success btn-active-color-white btn-sm mx-1"
+                                    [disabled]="PROFORMA.state_proforma == 2">
+                                     <i class="ki-duotone ki-abstract-26 fs-2 text-white">
+                                         <span class="path1"></span><span class="path2"></span>
+                                     </i>
+                                 </button>
+                                    <a href="#" onclick="return false;" 
+                                    (click)="openWeeklyProgress(PROFORMA)" 
+                                    placement="top-start" 
+                                    ngbTooltip="Progreso Semanal" 
+                                    class="btn btn-icon btn-bg-info btn-active-color-white btn-sm mx-1">
+                                     <i class="ki-duotone ki-calendar fs-2 text-white">
                                          <span class="path1"></span><span class="path2"></span>
                                      </i>
                                  </a>

@@ -1,0 +1,56 @@
+:host {
+  display: block;
+}
+
+.modal-body {
+  max-height: 70vh;
+  overflow-y: auto;
+}
+
+.table {
+  th, td {
+    vertical-align: middle;
+  }
+}
+
+.badge {
+  padding: 0.5em 0.75em;
+  font-size: 0.85em;
+  
+  &.badge-success {
+    background-color: #50cd89;
+    color: #ffffff;
+  }
+  
+  &.badge-warning {
+    background-color: #ffc700;
+    color: #ffffff;
+  }
+  
+  &.badge-danger {
+    background-color: #f1416c;
+    color: #ffffff;
+  }
+}
+
+.custom-control {
+  padding-left: 1.5rem;
+  
+  .custom-control-input {
+    &:checked ~ .custom-control-label::before {
+      background-color: #009ef7;
+      border-color: #009ef7;
+    }
+  }
+  
+  .custom-control-label {
+    &::before {
+      border: 1px solid #e4e6ef;
+    }
+  }
+}
+
+.spinner-border {
+  width: 3rem;
+  height: 3rem;
+} 

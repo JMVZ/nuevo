@@ -183,7 +183,6 @@
                                     <input type="text" name="email" [(ngModel)]="email" class="form-control form-control-solid mb-3 mb-lg-0" placeholder="example@gmail.com" />
                                     <!--end::Input-->
                                 </div>
-            
                             </div>
                         </div>
                     </div>
@@ -194,54 +193,26 @@
                                 <div class="col-4">
                                     <!--begin::Label-->
                                     <label class="required fw-bold fs-6 mb-2">Región: (*) </label>
-                                    <select
-                                        class="form-control form-select-solid fw-bolder"
-                                        name="ubigeo_region"
-                                        [(ngModel)]="ubigeo_region"
-                                        placeholder="Selec. Región"
-                                        (change)="changeRegion($event)"
-                                    >   
-                                    <option value="">Ninguno</option>
-                                        <ng-container *ngFor="let REGION of REGIONES">
-                                            <option [value]="REGION.id">{{ REGION.name }}</option>
-                                        </ng-container>
-                                        
-                                    </select>
-            
+                                    <!--end::Label-->
+                                    <!--begin::Input-->
+                                    <input type="text" name="ubigeo_region" [(ngModel)]="ubigeo_region" class="form-control form-control-solid mb-3 mb-lg-0" value="No especificado" />
+                                    <!--end::Input-->
                                 </div>
                                 <div class="col-4">
-                                     <!--begin::Label-->
-                                     <label class="required fw-bold fs-6 mb-2">Provincia: (*) </label>
-                                     <select
-                                         class="form-control form-select-solid fw-bolder"
-                                         name="ubigeo_provincia"
-                                         [(ngModel)]="ubigeo_provincia"
-                                         placeholder="Selec. Provincia"
-                                         (change)="changeProvincia($event)"
-                                     >
-                                         <option value="">Ninguno</option>
-                                         <ng-container *ngFor="let PROVINCIA of PROVINCIA_SELECTEDS">
-                                            <option [value]="PROVINCIA.id">{{ PROVINCIA.name }}</option>
-                                         </ng-container>
-                                         
-                                     </select>
+                                    <!--begin::Label-->
+                                    <label class="required fw-bold fs-6 mb-2">Provincia: (*) </label>
+                                    <!--end::Label-->
+                                    <!--begin::Input-->
+                                    <input type="text" name="ubigeo_provincia" [(ngModel)]="ubigeo_provincia" class="form-control form-control-solid mb-3 mb-lg-0" value="No especificado" />
+                                    <!--end::Input-->
                                 </div>
                                 <div class="col-4">
                                     <!--begin::Label-->
                                     <label class="required fw-bold fs-6 mb-2">Distrito: (*) </label>
-                                    <select
-                                        class="form-control form-select-solid fw-bolder"
-                                        name="ubigeo_distrito"
-                                        [(ngModel)]="ubigeo_distrito"
-                                        placeholder="Selec. Distrito"
-                                    >
-                                        <option value="">Ninguno</option>
-                                        
-                                        <ng-container *ngFor="let DISTRITO of DISTRITO_SELECTEDS">
-                                            <option [value]="DISTRITO.id">{{ DISTRITO.name }}</option>
-                                         </ng-container>
-                                    </select>
-            
+                                    <!--end::Label-->
+                                    <!--begin::Input-->
+                                    <input type="text" name="ubigeo_distrito" [(ngModel)]="ubigeo_distrito" class="form-control form-control-solid mb-3 mb-lg-0" value="No especificado" />
+                                    <!--end::Input-->
                                 </div>
                             </div>
                             <div class="fv-row row mb-7">

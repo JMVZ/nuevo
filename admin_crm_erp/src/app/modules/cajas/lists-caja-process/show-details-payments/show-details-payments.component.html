@@ -21,31 +21,32 @@
     </div>
     <!--end::Modal header-->
     <!--begin::Modal body-->
-    <div class="modal-body scroll-y mx-5">
+    <div class="modal-body scroll-y mx-5 mx-xl-15 my-7">
         <!--begin::Form-->
         <form id="kt_modal_add_user_form" class="form" action="#">
-             <!--begin::Scroll-->
+            <!--begin::Scroll-->
             <div class="d-flex flex-column scroll-y me-n7 pe-7" id="kt_modal_add_user_scroll" data-kt-scroll="true" data-kt-scroll-activate="{default: false, lg: true}" data-kt-scroll-max-height="auto" data-kt-scroll-dependencies="#kt_modal_add_user_header" data-kt-scroll-wrappers="#kt_modal_add_user_scroll" data-kt-scroll-offset="300px">
                 <!--begin::Input group-->
-                <div class="fv-row row">
-                   <div class="col-12">
-                    <div id="" class="table-responsive">
-                        <table class="table align-middle table-row-dashed fs-6 gy-5 dataTable" id="kt_customers_table"
-                            style="width: 1199.5px;">
+                <div class="fv-row mb-7">
+                    <!--begin::Label-->
+                    <label class="required fw-semibold fs-6 mb-2">Detalles de Pagos</label>
+                    <!--end::Label-->
+                    <!--begin::Input-->
+                    <div class="table-responsive">
+                        <table class="table table-row-bordered table-row-gray-100 align-middle gs-0 gy-3">
                             <thead>
                                 <tr class="text-start text-gray-500 fw-bold fs-7 text-uppercase gs-0" role="row">
-                                    
                                     <th class="min-w-125px dt-orderable-asc dt-orderable-desc" data-dt-column="1" rowspan="1"
                                         colspan="1" aria-label="Customer Name: Activate to sort" tabindex="0"><span
                                             class="dt-column-title" role="button">Imagen</span><span
                                             class="dt-column-order"></span></th>
         
-                                        <th class="min-w-125px dt-orderable-asc dt-orderable-desc" data-dt-column="1" rowspan="1"
+                                    <th class="min-w-125px dt-orderable-asc dt-orderable-desc" data-dt-column="1" rowspan="1"
                                         colspan="1" aria-label="Customer Name: Activate to sort" tabindex="0"><span
                                             class="dt-column-title" role="button">Metodo de pago</span><span
                                             class="dt-column-order"></span></th>
         
-                                        <th class="min-w-125px dt-orderable-asc dt-orderable-desc" data-dt-column="1" rowspan="1"
+                                    <th class="min-w-125px dt-orderable-asc dt-orderable-desc" data-dt-column="1" rowspan="1"
                                         colspan="1" aria-label="Customer Name: Activate to sort" tabindex="0"><span
                                             class="dt-column-title" role="button">Monto</span><span
                                             class="dt-column-order"></span></th>
@@ -60,7 +61,7 @@
                                 <ng-container *ngFor="let PAGO of PAGOS;let i=index">
                                     <tr [ngClass]="{'payment-process': PAGO.date_validation}">
                                         <td>
-                                            <img *ngIf="PAGO.imagen" [src]="PAGO.imagen" style="width: 90px;" alt="" srcset="">
+                                            <img *ngIf="PAGO.imagen" [src]="PAGO.imagen" style="width: 90px; cursor: pointer;" (click)="openPdf(PAGO.imagen)" alt="" srcset="">
                                         </td>
                                         
                                         <td>
@@ -68,7 +69,7 @@
                                         </td>
             
                                         <td>
-                                            {{ PAGO.amount }} PEN
+                                            {{ PAGO.amount }} MXN
                                         </td>
 
                                         <td >
@@ -77,7 +78,6 @@
                                                 <br>
                                                 <span>{{ PAGO.user_verification.full_name }}</span>
                                             </ng-container>
-                                            
                                         </td>
                                     </tr>
                                 </ng-container>
@@ -85,8 +85,8 @@
                             <tfoot></tfoot>
                         </table>
                     </div>
-                   </div>
-                </div> 
+                </div>
+                <!--end::Input group-->
             </div>
             <!--end::Scroll-->
 
@@ -96,7 +96,6 @@
             </div>
             <!--end::Actions-->
         </form>
-        <!--end::Form-->
     </div>
     <!--end::Modal body-->
 </div>

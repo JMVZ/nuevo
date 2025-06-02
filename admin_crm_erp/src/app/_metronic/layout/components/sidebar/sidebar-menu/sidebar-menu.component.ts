@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { AuthService } from 'src/app/modules/auth';
+import { AuthService } from '../../../../../modules/auth/services/auth.service';
 
 @Component({
   selector: 'app-sidebar-menu',
@@ -33,5 +33,9 @@ export class SidebarMenuComponent implements OnInit {
 
   isRole(){
     return this.user.role_name == 'Super-Admin' ? true : false;
+  }
+
+  isPermission(permission: string): boolean {
+    return this.showMenu([permission]);
   }
 }

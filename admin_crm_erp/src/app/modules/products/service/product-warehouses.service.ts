@@ -46,4 +46,43 @@ export class ProductWarehousesService {
         finalize(() => this.isLoadingSubject.next(false))
       );
     }
+
+  getSalidas(page: number, pageSize: number) {
+    this.isLoadingSubject.next(true);
+    let headers = new HttpHeaders({'Authorization': 'Bearer '+ this.authservice.token});
+    let URL = URL_SERVICIOS+"/product-warehouse-outputs?page="+page+"&per_page="+pageSize;
+    return this.http.get(URL, {headers: headers}).pipe(
+      finalize(() => this.isLoadingSubject.next(false))
+    );
+  }
+
+  registrarSalida(data: { 
+    product_warehouse_id: number, 
+    quantity: number, 
+    reason: string,
+    proforma_id?: number,
+    user_id?: number 
+  }) {
+    this.isLoadingSubject.next(true);
+    let headers = new HttpHeaders({'Authorization': 'Bearer '+ this.authservice.token});
+    let URL = URL_SERVICIOS+"/product-warehouse-outputs";
+    return this.http.post(URL, data, {headers: headers}).pipe(
+      finalize(() => this.isLoadingSubject.next(false))
+    );
+  }
+
+  getAllWarehouses() {
+    let headers = new HttpHeaders({'Authorization': 'Bearer '+ this.authservice.token});
+    let URL = URL_SERVICIOS+"/warehouses";
+    return this.http.get(URL,{headers: headers});
+  }
+
+  getEntradas(page: number, pageSize: number) {
+    this.isLoadingSubject.next(true);
+    let headers = new HttpHeaders({'Authorization': 'Bearer '+ this.authservice.token});
+    let URL = URL_SERVICIOS+"/product-warehouse-inputs?page="+page+"&per_page="+pageSize;
+    return this.http.get(URL, {headers: headers}).pipe(
+      finalize(() => this.isLoadingSubject.next(false))
+    );
+  }
 }

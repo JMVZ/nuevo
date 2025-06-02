@@ -256,6 +256,22 @@
             </span>
           </a>
         </div>
+        <div class="menu-item">
+          <a class="menu-link without-sub" routerLinkActive="active" routerLink="/productos/entradas">
+            <span class="menu-bullet">
+              <span class="bullet bullet-dot"></span>
+            </span>
+            <span class="menu-title">Entradas de productos</span>
+          </a>
+        </div>
+        <div class="menu-item">
+          <a class="menu-link without-sub" routerLinkActive="active" routerLink="/productos/salidas">
+            <span class="menu-bullet">
+              <span class="bullet bullet-dot"></span>
+            </span>
+            <span class="menu-title">Salidas de productos</span>
+          </a>
+        </div>
       </div>
     </div>
 
@@ -555,6 +571,20 @@
         <span class="menu-title">Kardex</span>
       </a>
     </div>
+
+    <!--begin::Reportes-->
+    <div class="menu-item" *ngIf="isRole()">
+        <a class="menu-link" routerLink="/reports" routerLinkActive="active">
+            <span class="menu-icon">
+                <i class="ki-duotone ki-document fs-2">
+                    <span class="path1"></span>
+                    <span class="path2"></span>
+                </i>
+            </span>
+            <span class="menu-title">Reportes</span>
+        </a>
+    </div>
+    <!--end::Reportes-->
 
   </div>
   <!--end::Menu-->

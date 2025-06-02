@@ -7,7 +7,7 @@ export const environment = {
   appVersion: 'v8.1.8',
   USERDATA_KEY: 'authf649fc9a5f55',
   isMockEnabled: false,
-  apiUrl: 'api',
+  apiUrl: 'https://api-crm.mogancontrol.com/api',
   appThemeName: 'Metronic',
   appPurchaseUrl: 'https://1.envato.market/EA4JP',
   appHTMLIntegration: 'https://preview.keenthemes.com/metronic8/demo1/documentation/base/helpers/flex-layouts.html',
@@ -156,9 +156,10 @@ export const environment = {
       'thumbnail': './assets/media/demos/demo20.png'
     },
   },
-  URL_BACKEND: 'http://api.dominio.com/',
-  URL_SERVICIOS: 'http://api.dominio.com/api',
-  URL_FRONTED: 'http://admin.dominio.com',
+  URL_BACKEND: 'https://api-crm.mogancontrol.com/',
+  URL_SERVICIOS: 'https://api-crm.mogancontrol.com/api',
+  URL_FRONTED: 'https://admin-crm.mogancontrol.com',
+  appUrl: 'https://admin-crm.mogancontrol.com',
 };
 
 /*

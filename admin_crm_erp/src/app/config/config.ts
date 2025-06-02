@@ -3,7 +3,7 @@ import { environment } from "src/environments/environment";
 
 export const URL_BACKEND = environment.URL_BACKEND;
 export const URL_SERVICIOS = environment.URL_SERVICIOS;
-export const URL_FRONTED = environment.URL_FRONTED;
+export const URL_FRONTED = environment.appUrl;
 
 export const SIDEBAR:any = [
   {
@@ -272,6 +272,23 @@ export const SIDEBAR:any = [
           name:'Disponible',
           permiso: 'kardex',
         },
+      ]
+    },
+    {
+      'name': 'Reportes',
+      'permisos': [
+        {
+          name:'Salidas por Producto',
+          permiso: 'report_product_outputs',
+        },
+        {
+          name:'Consumo por Usuario',
+          permiso: 'report_user_consumption',
+        },
+        {
+          name:'Salidas por Proforma',
+          permiso: 'report_proforma_outputs',
+        }
       ]
     },
 ];

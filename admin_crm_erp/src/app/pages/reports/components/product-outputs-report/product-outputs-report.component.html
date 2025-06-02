@@ -1,0 +1,72 @@
+<div class="product-outputs-report">
+  <form [formGroup]="filterForm" (ngSubmit)="generateReport()">
+    <div class="filter-section">
+      <div class="form-group">
+        <label>Fecha Inicio</label>
+        <input type="date" formControlName="startDate">
+      </div>
+
+      <div class="form-group">
+        <label>Fecha Fin</label>
+        <input type="date" formControlName="endDate">
+      </div>
+
+      <div class="form-group">
+        <label>Almacén</label>
+        <select formControlName="warehouseId">
+          <option value="">Todos</option>
+          <option *ngFor="let warehouse of warehouses" [value]="warehouse.id">
+            {{warehouse.name}}
+          </option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label>Producto</label>
+        <select formControlName="productId">
+          <option value="">Todos</option>
+          <option *ngFor="let product of products" [value]="product.id">
+            {{product.name}}
+          </option>
+        </select>
+      </div>
+
+      <div class="form-actions">
+        <button type="submit" [disabled]="loading">
+          {{loading ? 'Generando...' : 'Generar Reporte'}}
+        </button>
+        <button type="button" (click)="exportToExcel()" [disabled]="loading">
+          Exportar a Excel
+        </button>
+      </div>
+    </div>
+  </form>
+
+  <div class="report-content" *ngIf="!loading">
+    <!-- Aquí irá la tabla con los resultados -->
+    <table>
+      <thead>
+        <tr>
+          <th>Fecha</th>
+          <th>Almacén</th>
+          <th>Producto</th>
+          <th>Cantidad</th>
+          <th>Usuario</th>
+          <th>Proforma</th>
+          <th>Motivo</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let row of reportData">
+          <td>{{ row.created_at | date:'short' }}</td>
+          <td>{{ row.product_warehouse?.warehouse?.name }}</td>
+          <td>{{ row.product_warehouse?.product?.name }}</td>
+          <td>{{ row.quantity }}</td>
+          <td>{{ row.user?.name || '-' }}</td>
+          <td>{{ row.proforma?.codigo || '-' }}</td>
+          <td>{{ row.reason }}</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div> 

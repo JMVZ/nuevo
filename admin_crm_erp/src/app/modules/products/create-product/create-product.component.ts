@@ -30,10 +30,10 @@ export class CreateProductComponent {
   umbral:number = 0;
   umbral_unit_id:string = '';
 
-  weight:number = 0;
-  width:number = 0;
-  height:number = 0;
-  length:number = 0;
+  weight:number = 1;
+  width:number = 10;
+  height:number = 10;
+  length:number = 10;
 
   isLoading$:any;
 
@@ -60,13 +60,27 @@ export class CreateProductComponent {
     public toast:ToastrService,
     public productService: ProductsService,
   ) {
+    // Valores predeterminados para dimensiones
+    this.weight = 1;
+    this.width = 10;
+    this.height = 10;
+    this.length = 10;
     
+    // Imagen predeterminada
+    this.imagen_previzualiza = 'assets/media/svg/files/blank-image.svg';
   }
 
   ngOnInit(): void {
     //Called after the constructor, initializing input properties, and the first call to ngOnChanges.
     //Add 'implements OnInit' to the class.
     this.isLoading$ = this.productService.isLoading$;
+
+    // Cargar imagen predeterminada
+    fetch('assets/media/svg/files/blank-image.svg')
+      .then(response => response.blob())
+      .then(blob => {
+        this.imagen_product = new File([blob], 'default-image.svg', { type: 'image/svg+xml' });
+      });
 
     this.productService.configAll().subscribe((resp:any) => {
       console.log(resp);
@@ -218,7 +232,6 @@ export class CreateProductComponent {
       !this.product_categorie_id ||
       !this.sku ||
       !this.tax_selected ||
-      // !this.importe_iva ||
       !this.weight  ||
       !this.width  ||
       !this.height  ||
@@ -230,10 +243,6 @@ export class CreateProductComponent {
 
    if(this.WAREHOUSES_PRODUCT.length == 0){
     this.toast.error("VALIDACIÓN","Necesitas ingresar al menos un registro de existencia de producto");
-      return;
-   }
-   if(this.WALLETS_PRODUCT.length == 0){
-    this.toast.error("VALIDACIÓN","Necesitas ingresar al menos un listado de precio al producto");
       return;
    }
 
@@ -283,7 +292,6 @@ export class CreateProductComponent {
       this.description = ''
       this.state = '1';
       this.product_categorie_id = '';
-      this.imagen_product = null;
       this.disponiblidad = '1';
       this.tiempo_de_abastecimiento = 0;
       this.is_discount = 1;
@@ -293,14 +301,21 @@ export class CreateProductComponent {
       this.importe_iva = 0;
       this.sku = '';
       this.is_gift = 1;
-      this.weight = 0;
-      this.width = 0;
-      this.height = 0;
-      this.length = 0;
+      this.weight = 1;
+      this.width = 10;
+      this.height = 10;
+      this.length = 10;
       this.umbral = 0;
       this.umbral_unit_id = '';
       this.WAREHOUSES_PRODUCT = [];
       this.WALLETS_PRODUCT = [];
       this.imagen_previzualiza = 'assets/media/svg/files/blank-image.svg';
+      
+      // Recargar imagen predeterminada
+      fetch('assets/media/svg/files/blank-image.svg')
+        .then(response => response.blob())
+        .then(blob => {
+          this.imagen_product = new File([blob], 'default-image.svg', { type: 'image/svg+xml' });
+        });
   }
 }

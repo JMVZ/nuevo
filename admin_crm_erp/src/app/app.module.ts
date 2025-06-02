@@ -18,6 +18,7 @@ import { ToastrModule } from 'ngx-toastr';
 // #fake-end#
 import { NgbPaginationModule } from '@ng-bootstrap/ng-bootstrap';
 import { PermissionGeneralInterceptor } from './permission-general.interceptor';
+import { AuthInterceptor } from './auth.interceptor';
 
 function appInitializer(authService: AuthService) {
   return () => {
@@ -57,6 +58,11 @@ function appInitializer(authService: AuthService) {
       useFactory: appInitializer,
       multi: true,
       deps: [AuthService],
+    },
+    {
+      provide: HTTP_INTERCEPTORS,
+      useClass: AuthInterceptor,
+      multi: true
     },
     {
       provide: HTTP_INTERCEPTORS,

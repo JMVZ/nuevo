@@ -381,15 +381,6 @@ export class EditProductComponent {
       return;
     }
 
-  //  if(this.WAREHOUSES_PRODUCT.length == 0){
-  //   this.toast.error("VALIDACIÓN","Necesitas ingresar al menos un registro de existencia de producto");
-  //     return;
-  //  }
-  //  if(this.WALLETS_PRODUCT.length == 0){
-  //   this.toast.error("VALIDACIÓN","Necesitas ingresar al menos un listado de precio al producto");
-  //     return;
-  //  }
-
     let formData = new FormData();
     formData.append("title",this.title);
     formData.append("description",this.description);

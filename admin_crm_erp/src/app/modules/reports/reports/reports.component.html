@@ -1,0 +1,64 @@
+<!--begin::Card-->
+<div class="card">
+    <!--begin::Card header-->
+    <div class="card-header border-0 pt-6">
+        <div class="card-title">
+            <h2>Reportes del Sistema</h2>
+        </div>
+    </div>
+    <!--end::Card header-->
+
+    <!--begin::Card body-->
+    <div class="card-body pt-0">
+        <!--begin::Reports Grid-->
+        <div class="reports-grid" *ngIf="!activeTab">
+            <!--begin::Report Card-->
+            <div class="report-card" (click)="setActiveTab('product-outputs')">
+                <div class="report-icon">
+                    <i class="ki-duotone ki-box fs-2x">
+                        <span class="path1"></span>
+                        <span class="path2"></span>
+                    </i>
+                </div>
+                <div class="report-info">
+                    <h3 class="report-title">Salidas de Productos</h3>
+                    <p class="report-description">Reporte detallado de salidas de productos por almacén</p>
+                </div>
+            </div>
+            <!--end::Report Card-->
+
+            <!--begin::Report Card-->
+            <div class="report-card" (click)="setActiveTab('proforma-cost-analysis')">
+                <div class="report-icon">
+                    <i class="ki-duotone ki-dollar fs-2x">
+                        <span class="path1"></span>
+                        <span class="path2"></span>
+                    </i>
+                </div>
+                <div class="report-info">
+                    <h3 class="report-title">Análisis de Costos</h3>
+                    <p class="report-description">Análisis de costos y ganancias por proforma</p>
+                </div>
+            </div>
+            <!--end::Report Card-->
+        </div>
+        <!--end::Reports Grid-->
+
+        <!--begin::Report Content-->
+        <div class="report-content mt-10" *ngIf="activeTab">
+            <div class="d-flex justify-content-between align-items-center mb-5">
+                <h3 class="report-content-title">
+                    <i class="ki-duotone ki-arrow-left fs-2 me-2 cursor-pointer" (click)="setActiveTab(null)"></i>
+                    {{getReportTitle()}}
+                </h3>
+            </div>
+            <ng-container *ngIf="activeTab === 'product-outputs'">
+                <app-product-outputs-report></app-product-outputs-report>
+            </ng-container>
+            <app-proforma-cost-analysis *ngIf="activeTab === 'proforma-cost-analysis'"></app-proforma-cost-analysis>
+        </div>
+        <!--end::Report Content-->
+    </div>
+    <!--end::Card body-->
+</div>
+<!--end::Card-->

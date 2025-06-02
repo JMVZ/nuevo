@@ -61,6 +61,10 @@ export class CreateUserComponent {
       return false;
     }
     
+    if(!this.email){
+      this.toast.error("Validación","El email es requerido");
+      return false;
+    }
     
     if((!this.type_document || !this.n_document)){
       this.toast.error("Validación","Es requerido el tipo de documento , junto con el numero del documento");

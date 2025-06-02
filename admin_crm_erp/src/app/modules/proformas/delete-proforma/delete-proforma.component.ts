@@ -26,17 +26,20 @@ export class DeleteProformaComponent {
   }
 
   delete(){
-    
-    this.proformaService.deleteProforma(this.proforma_selected.id).subscribe((resp:any) => {
-      console.log(resp);
-      if(resp.message == 403){
-        this.toast.error("Validación",resp.message_text);
-      }else{
-        this.toast.success("Exito","La proforma se elimino correctamente");
+    this.proformaService.deleteProforma(this.proforma_selected.id).subscribe({
+      next: (resp:any) => {
+        this.toast.success("Exito","La proforma se eliminó correctamente");
         this.ProformasD.emit(resp.message);
         this.modal.close();
+      },
+      error: (err:any) => {
+        if (err.status === 403 && err.error && err.error.message) {
+          this.toast.error(err.error.message, 'Acción no permitida');
+        } else {
+          this.toast.error('Error al eliminar la proforma');
+        }
       }
-    })
+    });
   }
 
 }

@@ -47,6 +47,16 @@ export class UserModel extends AuthModel {
       tipsOnMetronicBusinessProducts: boolean;
     };
   };
+  // Campos adicionales
+  name: string;
+  surname: string;
+  role_id: number;
+  sucursale_id: number;
+  type_document: string;
+  n_document: string;
+  gender: string;
+  avatar: string;
+  sucursale?: any;
 
   setUser(_user: unknown) {
     const user = _user as UserModel;
@@ -62,5 +72,15 @@ export class UserModel extends AuthModel {
     this.phone = user.phone || '';
     this.address = user.address;
     this.socialNetworks = user.socialNetworks;
+    // Campos adicionales
+    this.name = user.name || '';
+    this.surname = user.surname || '';
+    this.role_id = user.role_id;
+    this.sucursale_id = user.sucursale_id;
+    this.type_document = user.type_document || '';
+    this.n_document = user.n_document || '';
+    this.gender = user.gender || '';
+    this.avatar = user.avatar || '';
+    this.sucursale = user.sucursale;
   }
 }

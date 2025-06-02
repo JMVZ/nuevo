@@ -1,16 +1,12 @@
 import { Component, ElementRef, ViewChild } from '@angular/core';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { ToastrService } from 'ngx-toastr';
-import { fromEvent, debounceTime } from 'rxjs';
 import { UBIGEO_DISTRITOS } from 'src/app/config/ubigeo_distritos';
 import { UBIGEO_PROVINCIA } from 'src/app/config/ubigeo_provincias';
 import { UBIGEO_REGIONES } from 'src/app/config/ubigeo_regiones';
 import { CreateClientsCompanyComponent } from '../../clients/create-clients-company/create-clients-company.component';
 import { CreateClientsPersonComponent } from '../../clients/create-clients-person/create-clients-person.component';
-import { DeleteProductDetailProformaComponent } from '../componets/delete-product-detail-proforma/delete-product-detail-proforma.component';
-import { EditProductDetailProformaComponent } from '../componets/edit-product-detail-proforma/edit-product-detail-proforma.component';
 import { SearchClientsComponent } from '../componets/search-clients/search-clients.component';
-import { SearchProductsComponent } from '../componets/search-products/search-products.component';
 import { ProformasService } from '../service/proformas.service';
 import { ActivatedRoute } from '@angular/router';
 
@@ -26,27 +22,18 @@ export class EditProformaComponent {
   full_name:string = ''
   phone:string = ''
 
-  search_product:string = '';
+  // Nueva variable para subproyectos (reemplaza el manejo individual de productos)
+  SUBPROYECTOS_DATA: any = [];
   
-  price:number = 0;
-  description_product:string = '';
-  quantity_product:number = 0;
-  unidad_product:string = '';
-  almacen_product:string = '';
-  PRODUCT_SELECTED:any;
-  loadUnidad:Boolean = false;
-  warehouses_product:any = [];
-  exits_warehouse:any = [];
-  amount_discount:number = 0;
-
-  DETAIL_PROFORMAS:any = [];
   description:string = '';
+  final_product_title: string = '';
+  final_product_description: string = '';
+  weeks: number = 0;
 
   agencia:string = '';
   full_name_encargado:string = '';
   documento_encargado:string = '';
   telefono_encargado:string = '';  
-
 
   REGIONES:any = UBIGEO_REGIONES;
   PROVINCIAS:any = UBIGEO_PROVINCIA;
@@ -86,16 +73,12 @@ export class EditProformaComponent {
   PAID_OUT_PROFORMA:number = 0;
 
   TODAY:string = 'Y/m/d';
-
-  source: any;
-  @ViewChild("discount") something:ElementRef; 
+  usar_precio_global: boolean = false;
+  precio_global: number = 0;
 
   PROFORMA_ID:string = '';
   PROFORMA_SELECTED:any;
 
-  is_gift:number = 1;
-  eval_disponibilidad:boolean = true;
-  message_disponibilidad:string = '';
   constructor(
     public modalService: NgbModal,
     public proformaService: ProformasService,
@@ -106,8 +89,6 @@ export class EditProformaComponent {
   }
 
   ngOnInit(): void {
-    //Called after the constructor, initializing input properties, and the first call to ngOnChanges.
-    //Add 'implements OnInit' to the class.
     this.isLoading$ = this.proformaService.isLoading$;
     this.user = this.proformaService.authservice.user;
     this.sucursale_asesor = this.user.sucursale_id;
@@ -125,13 +106,13 @@ export class EditProformaComponent {
       this.full_name = this.CLIENT_SELECTED.full_name;
       this.phone = this.CLIENT_SELECTED.phone;
 
-      this.DETAIL_PROFORMAS = this.PROFORMA_SELECTED.details;
-      // this.sumTotalDetail();
+      this.final_product_title = this.PROFORMA_SELECTED.final_product_title;
+      this.final_product_description = this.PROFORMA_SELECTED.final_product_description;
+      this.weeks = this.PROFORMA_SELECTED.weeks || 0;
 
       this.sucursale_deliverie_id = this.PROFORMA_SELECTED.proforma_deliverie.sucursale_deliverie_id;
       this.date_entrega = this.PROFORMA_SELECTED.proforma_deliverie.date_entrega;
       this.address = this.PROFORMA_SELECTED.proforma_deliverie.address;
-
 
       this.ubigeo_region = this.PROFORMA_SELECTED.proforma_deliverie.ubigeo_region;
       this.ubigeo_provincia = this.PROFORMA_SELECTED.proforma_deliverie.ubigeo_provincia;
@@ -170,21 +151,9 @@ export class EditProformaComponent {
       this.sucursale_deliveries = resp.sucursale_deliveries;
       this.method_payments  = resp.method_payments;
       this.TODAY = resp.today;
-      // this.isLoadingProcess();
     })
   }
 
-  initKeyUpDiscount() {
-    this.source = fromEvent(this.something.nativeElement, 'keyup');
-    this.source.pipe(debounceTime(1200)).subscribe((c:any) => 
-       {
-        console.log(c);
-         this.verifiedDiscount();
-         this.isLoadingProcess();
-       }
-   );
- }
- 
   isLoadingProcess(){
     this.proformaService.isLoadingSubject.next(true);
     setTimeout(() => {
@@ -215,6 +184,7 @@ export class EditProformaComponent {
       }
     })
   }
+  
   openSelectedClients(clients:any = []){
     const modalRef = this.modalService.open(SearchClientsComponent,{size:'lg',centered: true});
     modalRef.componentInstance.clients = clients
@@ -228,6 +198,7 @@ export class EditProformaComponent {
       this.toast.success("Exito","Se selecciono al cliente de la proforma");
     })
   }
+  
   createClientPerson(){
     const modalRef = this.modalService.open(CreateClientsPersonComponent,{size:'lg',centered: true});
     modalRef.componentInstance.client_segments = this.client_segments;
@@ -241,6 +212,7 @@ export class EditProformaComponent {
       this.isLoadingProcess();
     })
   }
+  
   createClientCompany(){
     const modalRef = this.modalService.open(CreateClientsCompanyComponent,{size:'lg',centered: true});
     modalRef.componentInstance.client_segments = this.client_segments;
@@ -253,265 +225,13 @@ export class EditProformaComponent {
       this.isLoadingProcess();
     })
   }
+  
   resetClient(){
     this.CLIENT_SELECTED = null;
     this.n_document = '';
     this.full_name = '';
     this.phone = '';
     this.isLoadingProcess();
-  }
-
-  searchProducts(){
-    if(!this.search_product){
-      this.toast.error("Validación","Necesitas ingresar al menos uno de los campos");
-      return;
-    }
-    this.proformaService.searchProducts(this.search_product).subscribe((resp:any) => {
-      console.log(resp);
-      if(resp.products.data.length > 1){
-        this.openSelectedProduct(resp.products.data);
-      }else{
-        if(resp.products.data.length == 1){
-          this.PRODUCT_SELECTED = resp.products.data[0];
-          this.search_product = this.PRODUCT_SELECTED.title;
-          setTimeout(() => {
-            this.initKeyUpDiscount();
-          }, 50);
-          this.toast.success("Exito","Se selecciono al producto para la proforma");
-          this.isLoadingProcess();
-        }else{
-          this.toast.error("Validación","No hay coincidencia en la busqueda");
-        }
-      }
-    })
-  }
-  openSelectedProduct(products:any = []){
-    const modalRef = this.modalService.open(SearchProductsComponent,{size:'lg',centered: true});
-    modalRef.componentInstance.products = products
-
-    modalRef.componentInstance.ProductSelected.subscribe((product:any) => {
-      this.PRODUCT_SELECTED = product;
-      this.search_product = this.PRODUCT_SELECTED.title;
-      setTimeout(() => {
-        this.initKeyUpDiscount();
-      }, 50);
-      this.isLoadingProcess();
-      this.toast.success("Exito","Se selecciono el producto para la proforma");
-    })
-  }
-  changeUnitProduct($event:any){
-    console.log($event.target.value);
-    if(!this.CLIENT_SELECTED){
-      this.loadUnidad = true;
-      this.unidad_product = '';
-      setTimeout(() => {
-        this.loadUnidad = false;
-      }, 50);
-      this.toast.error("Validación","Es necesario seleccionar a un cliente");
-      this.isLoadingProcess();
-      return;
-    }
-    let UNIT_SELECTED = $event.target.value;
-    this.warehouses_product = this.PRODUCT_SELECTED.warehouses.filter((wareh:any) => wareh.unit.id == UNIT_SELECTED);
-    this.exits_warehouse = this.warehouses_product.filter((wareh:any) => wareh.warehouse.sucursale_id == this.sucursale_asesor);
-    // filtro de precio multiple
-    let WALLETS = this.PRODUCT_SELECTED.wallets;
-    // las condiciones
-
-    // 1.- TENEMOS LA BUSQUEDA POR UNIDAD, SUCURSAL Y SEGMENTO DE CLIENTE
-    let WALLETS_FILTER = WALLETS.filter((wallet:any) => wallet.unit && wallet.sucursale && wallet.client_segment);
-    let PRICE_S = WALLETS_FILTER.find((wallet:any) => wallet.unit.id == UNIT_SELECTED && 
-                                              wallet.sucursale.id == this.sucursale_asesor &&
-                                            wallet.client_segment.id == this.CLIENT_SELECTED.client_segment.id)
-    if(PRICE_S){
-      this.price = PRICE_S.price_general;
-      return;
-    }
-    // 2.- ES LA BUSQUEDA POR UNIDAD Y POR SUCURSAL O POR SEGMENTO DE CLIENTE
-    WALLETS_FILTER = WALLETS.filter((wallet:any) => wallet.unit && wallet.sucursale && !wallet.client_segment);
-    let PRICE_SBA = WALLETS_FILTER.find((wallet:any) => wallet.unit.id == UNIT_SELECTED && 
-                                              wallet.sucursale.id == this.sucursale_asesor &&
-                                            wallet.client_segment == null);
-    WALLETS_FILTER = WALLETS.filter((wallet:any) => wallet.unit && !wallet.sucursale && wallet.client_segment);
-    let PRICE_SBB = WALLETS_FILTER.find((wallet:any) => wallet.unit.id == UNIT_SELECTED && 
-                                              wallet.sucursale == null &&
-                                            wallet.client_segment.id == this.CLIENT_SELECTED.client_segment.id);
-    if(PRICE_SBA && PRICE_SBB){
-      if(PRICE_SBA.price_general < PRICE_SBB.price_general){
-        this.price = PRICE_SBA.price_general;
-      }else{
-        this.price = PRICE_SBB.price_general;
-      }
-      return;
-    }
-    if(PRICE_SBA){
-      this.price = PRICE_SBA.price_general;
-      return;
-    }
-    if(PRICE_SBB){
-      this.price = PRICE_SBB.price_general;
-      return;
-    }
-    // 3.- ES LA BUSQUEDA POR UNIDAD, NADA MAS.
-    let PRICE_ST = WALLETS.find((wallet:any) => wallet.unit.id == UNIT_SELECTED && 
-                                              wallet.sucursale == null &&
-                                            wallet.client_segment == null);
-    if(PRICE_ST){
-      this.price = PRICE_ST.price_general;
-      return;
-    }                                   
-    // ENTONCES SE LE ASIGNARA EL PRECIO BASE DEL PRODUCTO
-    this.price = this.PRODUCT_SELECTED.price_general;
-  }
-  verifiedDiscount(){
-    console.log(this.amount_discount);
-    let DISCOUNT_MAX_REAL = (this.PRODUCT_SELECTED.max_discount*0.01)*this.price;
-    if(this.amount_discount > DISCOUNT_MAX_REAL){
-      this.toast.error("VALIDACIÓN","EL DESCUENTO SUPERA EL MONTO QUE TIENE CONFIGURADO");
-      this.amount_discount = 0;
-      return;
-    }
-    let DISCOUNT_MIN_REAL = (this.PRODUCT_SELECTED.min_discount*0.01)*this.price;
-    if(this.amount_discount < DISCOUNT_MIN_REAL){
-      this.toast.error("VALIDACIÓN","EL DESCUENTO NO SUPERA EL MONTO QUE TIENE CONFIGURADO");
-      this.amount_discount = 0;
-      return;
-    }
-  }
-  isGift(){
-    this.is_gift = this.is_gift == 1 ? 2 : 1;
-    if(this.is_gift == 2){
-      this.price = 0;
-    }
-  }
-
-  addProduct(){
-    if(!this.PRODUCT_SELECTED){
-      this.toast.error("Validación","No hay seleccionado un producto");
-      return;
-    }
-    if(this.is_gift == 1 && this.price == 0){
-      this.toast.error("Validación","No hay precio del producto");
-      return;
-    }
-    if(this.quantity_product == 0){
-      this.toast.error("Validación","No hay cantidad solicitada del producto");
-      return;
-    }
-    if(!this.unidad_product){
-      this.toast.error("Validación","No hay unidad del producto");
-      return;
-    }
-    if(this.PRODUCT_SELECTED && this.PRODUCT_SELECTED.disponiblidad == 2){
-      if(
-        (this.unidad_product && this.warehouses_product.length == 0) ||
-        (this.unidad_product && this.warehouses_product.length > 0 && this.exits_warehouse.length == 0)
-      ){
-        this.toast.error("Validación","El producto no se puede agregar debido a que no hay exitencias disponibles");
-        return;
-      }
-    } 
-    if(this.PRODUCT_SELECTED.disponiblidad == 3 && this.eval_disponibilidad){
-      this.proformaService.evalDisponibilidad(this.PRODUCT_SELECTED.id,this.unidad_product,this.quantity_product).subscribe((resp:any) => {
-        console.log(resp);
-        this.message_disponibilidad = resp.message;
-        this.eval_disponibilidad = false;
-        // this.addProduct();
-      })
-      return;
-    }
-    let SUBTOTAL = this.price-this.amount_discount;
-    let IMPUESTO = SUBTOTAL * (this.PRODUCT_SELECTED.importe_iva*0.01);
-    let UNIDAD = this.PRODUCT_SELECTED.units.find((item:any) => item.id == this.unidad_product);
-    // this.DETAIL_PROFORMAS.push({
-    //   product: this.PRODUCT_SELECTED,
-    //   description: this.description_product,
-    //   unidad_product: this.unidad_product,
-    //   unit: UNIDAD,
-    //   quantity: this.quantity_product,
-    //   discount: this.amount_discount,
-    //   price_unit: this.price,
-    //   subtotal: SUBTOTAL,
-    //   impuesto: IMPUESTO,
-    //   total:(SUBTOTAL + IMPUESTO)*this.quantity_product,
-    // })
-   
-    // this.sumTotalDetail();
-    let data = {
-      proforma_id: this.PROFORMA_ID,
-      product: this.PRODUCT_SELECTED,
-      description: this.description_product,
-      unidad_product: this.unidad_product,
-      unit: UNIDAD,
-      quantity: this.quantity_product,
-      discount: this.amount_discount,
-      price_unit: this.price,
-      subtotal: SUBTOTAL,
-      impuesto: IMPUESTO,
-      total:(SUBTOTAL + IMPUESTO)*this.quantity_product,
-    }
-    this.proformaService.addDetailProforma(data).subscribe((resp:any) => {
-      console.log(resp);
-      this.DETAIL_PROFORMAS.push(resp.detail);
-      this.TOTAL_PROFORMA = resp.new_total;
-      this.TOTAL_IMPUESTO_PROFORMA = resp.new_impuesto;
-      this.DEBT_PROFORMA = resp.new_debt;
-      this.resetProduct();
-    })
-  }
-
-  resetProduct(){
-    this.PRODUCT_SELECTED = null;
-    this.search_product = '';
-    this.price = 0;
-    this.quantity_product = 0;
-    this.warehouses_product = [];
-    this.amount_discount = 0;
-    this.description_product = '';
-    this.unidad_product = '';
-    this.almacen_product = '';
-    this.is_gift = 1;
-    this.message_disponibilidad = '';
-    this.eval_disponibilidad = true;
-  }
-
-  sumTotalDetail(){
-    this.TOTAL_PROFORMA = this.DETAIL_PROFORMAS.reduce((sum:number,current:any) => sum + current.total,0);
-    this.TOTAL_IMPUESTO_PROFORMA = this.DETAIL_PROFORMAS.reduce((sum:number,current:any) => sum + current.impuesto,0);
-    this.DEBT_PROFORMA = this.TOTAL_PROFORMA;
-    this.isLoadingProcess();
-  }
-
-  editProduct(DETAIL_PROFOR:any,INDEX:number){
-    const modalRef = this.modalService.open(EditProductDetailProformaComponent,{size: 'md',centered:true});
-    modalRef.componentInstance.DETAIL_PRODUCT = DETAIL_PROFOR;
-    modalRef.componentInstance.sucursale_asesor = this.sucursale_asesor;
-    modalRef.componentInstance.CLIENT_SELECTED = this.CLIENT_SELECTED;
-    modalRef.componentInstance.PROFORMA_ID = this.PROFORMA_ID;
-
-    modalRef.componentInstance.EditProductProforma.subscribe((product_edit:any) => {
-      this.TOTAL_PROFORMA = product_edit.new_total;
-      this.TOTAL_IMPUESTO_PROFORMA = product_edit.new_impuesto;
-      this.DEBT_PROFORMA = product_edit.new_debt;
-      this.DETAIL_PROFORMAS[INDEX] = product_edit.detail;
-      this.isLoadingProcess();
-      this.sumTotalDetail();
-    })
-  }
-
-  deleteProduct(DETAIL_PROFOR:any,INDEX:number){
-    const modalRef = this.modalService.open(DeleteProductDetailProformaComponent,{size: 'md',centered:true});
-    modalRef.componentInstance.DETAIL_PRODUCT = DETAIL_PROFOR;
-    modalRef.componentInstance.PROFORMA_ID = this.PROFORMA_ID;
-
-    modalRef.componentInstance.DeleteProductProforma.subscribe((product_edit:any) => {
-      this.TOTAL_PROFORMA = product_edit.new_total;
-      this.TOTAL_IMPUESTO_PROFORMA = product_edit.new_impuesto;
-      this.DEBT_PROFORMA = product_edit.new_debt;
-      this.DETAIL_PROFORMAS.splice(INDEX,1);
-      this.isLoadingProcess();
-      this.sumTotalDetail();
-    })
   }
 
   validationDeliverie(){
@@ -537,6 +257,7 @@ export class EditProformaComponent {
     console.log(provincias);
     this.PROVINCIA_SELECTEDS = provincias;
   }
+  
   changeProvincia($event:any){
     console.log($event.target.value);
     let PROVINCIA_ID = $event.target.value;
@@ -582,6 +303,7 @@ export class EditProformaComponent {
     reader.onloadend = () => this.imagen_previzualiza = reader.result;
     this.isLoadingProcess();
   }
+  
   changeSucursaleDeliverie(){
     this.ubigeo_region = '';
     this.region = '';
@@ -594,9 +316,14 @@ export class EditProformaComponent {
     this.documento_encargado = '';
     this.telefono_encargado = '';
   }
+  
   save(){
     if(!this.CLIENT_SELECTED){
       this.toast.error("Validación","Necesitas seleccionar un cliente");
+      return;
+    }
+    if(this.SUBPROYECTOS_DATA.length == 0){
+      this.toast.error("Error","Debe tener al menos un subproyecto");
       return;
     }
     if(!this.sucursale_deliverie_id){
@@ -605,6 +332,18 @@ export class EditProformaComponent {
     }
     if(!this.date_entrega){
       this.toast.error("Validación","La fecha de entrega es requerido")
+      return;
+    }
+    if(!this.final_product_title){
+      this.toast.error("Error","Debe ingresar el título del producto final");
+      return;
+    }
+    if(!this.final_product_description){
+      this.toast.error("Error","Debe ingresar la descripción del producto final");
+      return;
+    }
+    if(!this.weeks || this.weeks < 1){
+      this.toast.error("Error","Debe ingresar un número válido de semanas");
       return;
     }
 
@@ -646,70 +385,75 @@ export class EditProformaComponent {
       this.distrito = DISTRITO_SELECTED.name;
     }
 
+    // Usar precio global si está activado
+    const totalToUse = this.usar_precio_global && this.precio_global > 0 ? this.precio_global : this.TOTAL_PROFORMA;
+
+    // Usar FormData para enviar los datos igual que en create-proforma
     let formData = new FormData();
-
-    formData.append("client_id",this.CLIENT_SELECTED.id);
-    formData.append("client_segment_id",this.CLIENT_SELECTED.client_segment.id);
-    formData.append("description",this.description);
     
-    formData.append("sucursale_deliverie_id",this.sucursale_deliverie_id);
-    formData.append("date_entrega",this.date_entrega);
-    if(this.address){
-      formData.append("address",this.address);
-    }else{
-      formData.append("address",'');
-    }
-
-    if(this.agencia){
-      formData.append("agencia",this.agencia);
-    }else{
-      formData.append("agencia",'');
-    }
-    if(this.full_name_encargado){
-      formData.append("full_name_encargado",this.full_name_encargado);
-    }else{
-      formData.append("full_name_encargado",'');
-    }
-    if(this.documento_encargado){
-      formData.append("documento_encargado",this.documento_encargado);
-    }else{
-      formData.append("documento_encargado",'');
-    }
-    if(this.documento_encargado){
-      formData.append("telefono_encargado",this.telefono_encargado);
-    }else{
-      formData.append("telefono_encargado",'');
-    }
-
-    if(this.ubigeo_region){
-      formData.append("ubigeo_region",this.ubigeo_region);
-      formData.append("region",this.region);
-    }else{
-      formData.append("ubigeo_region",'');
-      formData.append("region",'');
-    }
-    if(this.ubigeo_provincia){
-      formData.append("ubigeo_provincia",this.ubigeo_provincia);
-      formData.append("provincia",this.provincia);
-    }else{
-      formData.append("ubigeo_provincia",'');
-      formData.append("provincia",'');
-    }
-    if(this.ubigeo_distrito){
-      formData.append("ubigeo_distrito",this.ubigeo_distrito);
-      formData.append("distrito",this.distrito);
-    }else{
-      formData.append("ubigeo_distrito",'');
-      formData.append("distrito",'');
+    // Datos básicos de la proforma
+    formData.append("client_id", this.CLIENT_SELECTED.id.toString());
+    formData.append("client_segment_id", this.CLIENT_SELECTED.client_segment_id.toString());
+    formData.append("subtotal", totalToUse.toString());
+    formData.append("total", totalToUse.toString());
+    formData.append("igv", this.TOTAL_IMPUESTO_PROFORMA.toString());
+    formData.append("debt", this.DEBT_PROFORMA.toString());
+    formData.append("paid_out", this.PAID_OUT_PROFORMA.toString());
+    formData.append("description", this.description);
+    formData.append("final_product_title", this.final_product_title);
+    formData.append("final_product_description", this.final_product_description);
+    formData.append("weeks", this.weeks.toString());
+    formData.append("usar_precio_global", this.usar_precio_global.toString());
+    if (this.usar_precio_global) {
+      formData.append("precio_global", this.precio_global.toString());
     }
     
-    this.proformaService.editProforma(this.PROFORMA_ID,formData).subscribe((resp:any) => {
+    // Datos de entrega
+    formData.append("sucursale_deliverie_id", this.sucursale_deliverie_id.toString());
+    formData.append("date_entrega", this.date_entrega);
+    formData.append("address", this.address);
+    formData.append("ubigeo_region", this.ubigeo_region);
+    formData.append("ubigeo_provincia", this.ubigeo_provincia);
+    formData.append("ubigeo_distrito", this.ubigeo_distrito);
+    formData.append("region", this.region);
+    formData.append("provincia", this.provincia);
+    formData.append("distrito", this.distrito);
+    formData.append("agencia", this.agencia);
+    formData.append("full_name_encargado", this.full_name_encargado);
+    formData.append("documento_encargado", this.documento_encargado);
+    formData.append("telefono_encargado", this.telefono_encargado);
+    
+    // Datos de subproyectos
+    formData.append("SUBPROYECTOS_DATA", JSON.stringify(this.SUBPROYECTOS_DATA));
+
+    this.proformaService.editProforma(this.PROFORMA_ID, formData).subscribe((resp:any) => {
       console.log(resp);
-      this.toast.success("Exito","La proforma se edito con exito");
+      this.toast.success("Exito","La proforma se editó con éxito");
     },(err:any) => {
       console.log(err);
       this.toast.error("Validación","Hubo un error en el servidor, intente nuevamente o acceda a la consola y vea que sucede");
     })
   }
-  
+
+  updateTotals() {
+    // Calcular totales basados en subproyectos
+    if(this.usar_precio_global && this.precio_global > 0){
+      this.TOTAL_PROFORMA = this.precio_global;
+      this.TOTAL_IMPUESTO_PROFORMA = 0;
+      this.DEBT_PROFORMA = this.precio_global;
+    } else {
+      this.TOTAL_PROFORMA = this.SUBPROYECTOS_DATA.reduce((sum: number, subproyecto: any) => {
+        return sum + subproyecto.productos.reduce((subSum: number, producto: any) => subSum + producto.total, 0);
+      }, 0);
+      this.TOTAL_IMPUESTO_PROFORMA = 0;
+      this.DEBT_PROFORMA = this.TOTAL_PROFORMA;
+    }
+    this.isLoadingProcess();
+  }
+
+  // Método para manejar cambios en subproyectos
+  onSubproyectosChanged(data: any) {
+    this.SUBPROYECTOS_DATA = data.subproyectos;
+    this.updateTotals();
+  }
 }
