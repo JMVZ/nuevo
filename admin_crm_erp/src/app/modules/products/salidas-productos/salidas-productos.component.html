@@ -74,10 +74,15 @@
         <tbody>
           <tr *ngFor="let salida of salidas">
             <td>{{ salida.created_at | date:'dd/MM/yyyy HH:mm' }}</td>
-            <td>{{ salida.product_warehouse.product.title }}</td>
+            <td>
+              <div class="d-flex flex-column">
+                <span class="fw-bold">{{ salida.product_warehouse?.product?.title || 'Sin producto' }}</span>
+                <small class="text-muted">{{ salida.product_warehouse?.product?.description || '' }}</small>
+              </div>
+            </td>
             <td>{{ salida.quantity }}</td>
-            <td>{{ salida.product_warehouse.unit.name }}</td>
-            <td>{{ salida.product_warehouse.warehouse.name }}</td>
+            <td>{{ salida.product_warehouse?.unit?.name || 'Sin unidad' }}</td>
+            <td>{{ salida.product_warehouse?.warehouse?.name || 'Sin almacén' }}</td>
             <td>{{ salida.reason }}</td>
             <td>{{ salida.proforma?.final_product_title || '-' }}</td>
             <td>{{ salida.user?.name || '-' }}</td>

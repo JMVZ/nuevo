@@ -19,6 +19,13 @@ import { WeeklyProgressComponent } from './componets/weekly-progress/weekly-prog
 import { AlertService } from '../../services/alert.service';
 import { SearchClientsComponent } from './componets/search-clients/search-clients.component';
 import { SubproyectosProformaComponent } from './componets/subproyectos-proforma/subproyectos-proforma.component';
+import { PdfViewerModalComponent } from './componets/pdf-viewer-modal/pdf-viewer-modal.component';
+
+// Material Design
+import { MatDialogModule } from '@angular/material/dialog';
+import { MatIconModule } from '@angular/material/icon';
+import { MatButtonModule } from '@angular/material/button';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 
 @NgModule({
   declarations: [
@@ -32,7 +39,8 @@ import { SubproyectosProformaComponent } from './componets/subproyectos-proforma
     SelectInventoryItemsComponent,
     WeeklyProgressComponent,
     SearchClientsComponent,
-    SubproyectosProformaComponent
+    SubproyectosProformaComponent,
+    PdfViewerModalComponent
   ],
   imports: [
     CommonModule,
@@ -43,10 +51,18 @@ import { SubproyectosProformaComponent } from './componets/subproyectos-proforma
     NgbModule,
     InlineSVGModule,
     SharedModule,
-    RouterModule
+    RouterModule,
+    // Material Design
+    MatDialogModule,
+    MatIconModule,
+    MatButtonModule,
+    MatProgressSpinnerModule
   ],
   providers: [
     AlertService
+  ],
+  exports: [
+    PdfViewerModalComponent
   ]
 })
 export class ProformasModule { }

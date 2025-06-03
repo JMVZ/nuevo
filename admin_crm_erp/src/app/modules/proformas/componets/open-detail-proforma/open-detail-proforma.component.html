@@ -43,6 +43,45 @@
                 
                             <!--begin::Table body-->
                             <tbody>
+                                <!-- Sección de Insumos Generales -->
+                                <tr class="bg-light-success">
+                                    <td colspan="4" class="fw-bold">
+                                        Insumos Generales
+                                        <span class="badge badge-light-success ms-2">Total</span>
+                                    </td>
+                                </tr>
+                                <ng-container *ngIf="getInsumosGenerales().length > 0; else noInsumos">
+                                    <tr *ngFor="let insumo of getInsumosGenerales()">
+                                        <td>
+                                            <div class="d-flex justify-content-start flex-column">
+                                                <span class="text-gray-900 fw-bold text-hover-primary mb-1 fs-6">{{ insumo.product.title }}</span>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <span class="text-muted fw-semibold text-muted d-block fs-7">{{ insumo.product.description || 'Sin descripción' }}</span>
+                                        </td>
+                                        <td>
+                                            <span class="text-muted fw-semibold text-muted d-block fs-7">{{ insumo.unit.name }}</span>
+                                        </td>
+                                        <td>
+                                            <span class="text-muted fw-semibold text-muted d-block fs-7">{{ insumo.cantidad_total }}</span>
+                                        </td>
+                                    </tr>
+                                </ng-container>
+                                <ng-template #noInsumos>
+                                    <tr>
+                                        <td colspan="4" class="text-center text-muted">
+                                            No hay insumos generales disponibles
+                                        </td>
+                                    </tr>
+                                </ng-template>
+
+                                <!-- Sección de Subproyectos -->
+                                <tr class="bg-light-primary">
+                                    <td colspan="4" class="fw-bold">
+                                        Insumos por Subproyecto
+                                    </td>
+                                </tr>
                                 <ng-container *ngFor="let subproyecto of PROFORMA.subproyectos">
                                     <tr class="bg-light-primary">
                                         <td colspan="4" class="fw-bold">

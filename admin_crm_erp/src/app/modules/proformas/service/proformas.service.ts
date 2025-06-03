@@ -1,4 +1,4 @@
-import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { HttpClient, HttpHeaders, HttpInterceptor, HttpRequest, HttpHandler, HttpEvent } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable, BehaviorSubject, finalize, tap, catchError, throwError, map, mergeMap, of } from 'rxjs';
 import { AuthService } from '../../auth';
@@ -73,6 +73,24 @@ interface AnalisisCostos {
   };
 }
 
+interface PdfUploadResponse {
+  success: boolean;
+  url: string;
+  file_path: string;
+  storage_path: string;
+  file_exists: boolean;
+  file_size: number;
+  app_url: string;
+  debug_info: {
+    directory_exists: boolean;
+    directory_writable: boolean;
+    file_writable: boolean;
+    pdf_content_size: number;
+    storage_path: string;
+  };
+  error?: string;
+}
+
 @Injectable({
   providedIn: 'root'
 })
@@ -89,6 +107,14 @@ export class ProformasService {
     this.isLoading$ = this.isLoadingSubject.asObservable();
   }
 
+  private getHeaders(): HttpHeaders {
+    return new HttpHeaders({
+      'Authorization': 'Bearer ' + this.authservice.token,
+      'Accept': 'application/json',
+      'Content-Type': 'application/json'
+    });
+  }
+
   searchClients(n_document:string,full_name:string,phone:string){
     this.isLoadingSubject.next(true);
     let LINK = "";
@@ -102,8 +128,10 @@ export class ProformasService {
       LINK += "&phone="+phone;
     }
     let URL = URL_SERVICIOS+"/proformas/search-clients?p=1"+LINK;
-    let headers = new HttpHeaders({'Authorization': 'Bearer '+this.authservice.token});
-    return this.http.get(URL,{headers:headers}).pipe(
+    return this.http.get(URL, {
+      headers: this.getHeaders(),
+      withCredentials: false
+    }).pipe(
       finalize(() => this.isLoadingSubject.next(false))
     );
   }
@@ -115,8 +143,10 @@ export class ProformasService {
       LINK += "&search="+search_product;
     }
     let URL = URL_SERVICIOS+"/proformas/search-products?p=1"+LINK;
-    let headers = new HttpHeaders({'Authorization': 'Bearer '+this.authservice.token});
-    return this.http.get(URL,{headers:headers}).pipe(
+    return this.http.get(URL, {
+      headers: this.getHeaders(),
+      withCredentials: false
+    }).pipe(
       finalize(() => this.isLoadingSubject.next(false))
     );
   }
@@ -124,8 +154,10 @@ export class ProformasService {
   configAll(){
     this.isLoadingSubject.next(true);
     let URL = URL_SERVICIOS+"/proformas/config";
-    let headers = new HttpHeaders({'Authorization': 'Bearer '+this.authservice.token});
-    return this.http.get(URL,{headers:headers}).pipe(
+    return this.http.get(URL, {
+      headers: this.getHeaders(),
+      withCredentials: false
+    }).pipe(
       finalize(() => this.isLoadingSubject.next(false))
     );
   }
@@ -134,10 +166,8 @@ export class ProformasService {
     this.isLoadingSubject.next(true);
     let URL = URL_SERVICIOS+"/proformas?page="+page;
     
-    // Agregar filtros si existen
     if (filters) {
       if (filters.search) {
-        // Búsqueda específica por nombre de cliente
         URL += `&client_name=${encodeURIComponent(filters.search)}`;
       }
       Object.keys(filters).forEach(key => {
@@ -147,24 +177,14 @@ export class ProformasService {
       });
     }
 
-    // Agregar parámetros para incluir las relaciones necesarias
     URL += "&include=client,product";
     
-    console.log('URL de la petición:', URL);
-    let headers = new HttpHeaders({
-      'Authorization': 'Bearer '+this.authservice.token,
-      'Accept': 'application/json'
-    });
-    
-    return this.http.get<ProformasResponse>(URL, {headers: headers}).pipe(
+    return this.http.get<ProformasResponse>(URL, {
+      headers: this.getHeaders(),
+      withCredentials: false
+    }).pipe(
       tap(response => {
         console.log('Respuesta del servidor:', response);
-        if (response && response.proformas && response.proformas.data) {
-          console.log('Proformas encontradas:', response.proformas.data.length);
-          response.proformas.data.forEach((proforma: Proforma) => {
-            console.log('Proforma:', proforma.client?.full_name);
-          });
-        }
       }),
       catchError(error => {
         console.error('Error en la petición:', error);
@@ -260,9 +280,45 @@ export class ProformasService {
   uploadPdf(formData: FormData) {
     this.isLoadingSubject.next(true);
     let URL = URL_SERVICIOS+"/proformas/upload-pdf";
-    let headers = new HttpHeaders({'Authorization': 'Bearer '+this.authservice.token});
-    return this.http.post(URL, formData, {headers: headers}).pipe(
-      finalize(() => this.isLoadingSubject.next(false))
+    let headers = new HttpHeaders({
+      'Authorization': 'Bearer '+this.authservice.token
+    });
+    
+    console.log('Iniciando subida de PDF...');
+    console.log('URL:', URL);
+    console.log('Headers:', headers);
+    
+    return this.http.post<PdfUploadResponse>(URL, formData, {
+      headers: headers,
+      reportProgress: true,
+      observe: 'events'
+    }).pipe(
+      tap(event => {
+        if (event.type === 1) { // UploadProgress
+          const percentDone = Math.round(100 * event.loaded / (event.total || event.loaded));
+          console.log(`Progreso: ${percentDone}%`);
+        }
+        if (event.type === 4) { // Response
+          console.log('Tipo de respuesta:', typeof event.body);
+          console.log('Respuesta completa del servidor:', JSON.stringify(event.body, null, 2));
+          if (event.body) {
+            console.log('URL del PDF:', event.body.url);
+            console.log('Ruta del archivo:', event.body.file_path);
+            console.log('Ruta de almacenamiento:', event.body.storage_path);
+          }
+        }
+      }),
+      catchError(error => {
+        console.error('Error detallado:', error);
+        console.error('Estado del error:', error.status);
+        console.error('Mensaje del error:', error.message);
+        console.error('Respuesta del error:', error.error);
+        return throwError(() => error);
+      }),
+      finalize(() => {
+        console.log('Finalizando subida de PDF');
+        this.isLoadingSubject.next(false);
+      })
     );
   }
 
@@ -296,12 +352,65 @@ export class ProformasService {
     );
   }
 
-  getPdfUrl(fileName: string): string {
-    // Si la URL ya es completa, la devolvemos tal cual
-  
-    // Si no, construimos la URL usando la URL base del backend
-    const baseUrl = environment.production ? 'https://api-crm.mogancontrol.com' : URL_SERVICIOS.replace('/api', '').replace('http://', 'https://');
-    return `${baseUrl}/storage/proformas/${fileName}`;
+  getPdfUrl(filename: string): string {
+    console.log('=== INICIO getPdfUrl ===');
+    console.log('Parámetros recibidos:', {
+      filename,
+      tipo: typeof filename,
+      longitud: filename?.length,
+      environment: environment.production ? 'PRODUCCIÓN' : 'DESARROLLO'
+    });
+    
+    if (!filename) {
+      console.error('Nombre de archivo inválido');
+      return '';
+    }
+
+    // Usar URL_SERVICIOS en lugar de la URL hardcodeada
+    const baseUrl = URL_SERVICIOS;
+    console.log('Usando URL base:', baseUrl);
+
+    // Asegurar que el nombre del archivo esté correctamente codificado
+    const encodedFilename = encodeURIComponent(filename);
+    console.log('Codificación del nombre:', {
+      original: filename,
+      codificado: encodedFilename
+    });
+    
+    // Construir la URL final
+    const url = `${baseUrl}/storage/proformas/${encodedFilename}`;
+    console.log('URL final generada:', url);
+    
+    // Verificar si la URL es accesible
+    fetch(url, { 
+      method: 'HEAD',
+      headers: {
+        'Accept': 'application/pdf',
+        'Authorization': `Bearer ${this.authservice.token}`
+      }
+    })
+      .then(response => {
+        console.log('Verificación de URL:', {
+          status: response.status,
+          statusText: response.statusText,
+          ok: response.ok,
+          url: response.url,
+          headers: {
+            'content-type': response.headers.get('content-type'),
+            'content-length': response.headers.get('content-length')
+          }
+        });
+      })
+      .catch(error => {
+        console.error('Error al verificar URL:', {
+          mensaje: error.message,
+          tipo: error.name,
+          url: url
+        });
+      });
+
+    console.log('=== FIN getPdfUrl ===');
+    return url;
   }
 
   getProformaCostAnalysis(proformaId: string): Observable<AnalisisCostos> {
