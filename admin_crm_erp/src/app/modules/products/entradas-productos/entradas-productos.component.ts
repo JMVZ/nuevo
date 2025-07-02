@@ -7,6 +7,7 @@ import { debounceTime, distinctUntilChanged, switchMap, takeUntil } from 'rxjs/o
 import { Observable, of, Subject } from 'rxjs';
 import { ToastrService } from 'ngx-toastr';
 import { SearchProductsComponent } from '../../proformas/componets/search-products/search-products.component';
+import { AuthService } from '../../auth/services/auth.service';
 
 @Component({
   selector: 'app-entradas-productos',
@@ -25,6 +26,12 @@ export class EntradasProductosComponent implements OnInit, OnDestroy {
   tipoMensaje: 'success' | 'danger' | '' = '';
   isLoading = false;
   searchTerm: string = '';
+  
+  // Variables para el historial
+  entradas: any[] = [];
+  page = 1;
+  pageSize = 10;
+  totalItems = 0;
 
   constructor(
     private fb: FormBuilder,
@@ -33,17 +40,21 @@ export class EntradasProductosComponent implements OnInit, OnDestroy {
     private modalService: NgbModal,
     private cdr: ChangeDetectorRef,
     private ngZone: NgZone,
-    private toast: ToastrService
+    private toast: ToastrService,
+    private authService: AuthService
   ) {
     this.formEntrada = this.fb.group({
       producto: ['', Validators.required],
       unidad: ['', Validators.required],
       almacen: ['', Validators.required],
-      cantidad: ['', [Validators.required, Validators.min(1)]]
+      cantidad: ['', [Validators.required, Validators.min(1)]],
+      motivo: ['']
     });
   }
 
   ngOnInit(): void {
+    this.cargarAlmacenes();
+    this.cargarEntradas();
     this.productWarehousesService.isLoading$
       .pipe(takeUntil(this.destroy$))
       .subscribe(loading => {
@@ -55,6 +66,39 @@ export class EntradasProductosComponent implements OnInit, OnDestroy {
   ngOnDestroy(): void {
     this.destroy$.next();
     this.destroy$.complete();
+  }
+
+  cargarAlmacenes() {
+    this.productsService.configAll().subscribe({
+      next: (resp: any) => {
+        this.almacenes = resp.almacens || [];
+        this.cdr.detectChanges();
+      },
+      error: (error) => {
+        console.error('Error al cargar almacenes:', error);
+      }
+    });
+  }
+
+  cargarEntradas() {
+    this.productWarehousesService.getEntradas(this.page, this.pageSize).subscribe({
+      next: (resp: any) => {
+        this.entradas = resp.entradas.data || [];
+        this.totalItems = resp.entradas.total || 0;
+        this.cdr.detectChanges();
+      },
+      error: (error) => {
+        console.error('Error al cargar entradas:', error);
+        this.mensaje = 'Error al cargar el historial de entradas';
+        this.tipoMensaje = 'danger';
+        this.cdr.detectChanges();
+      }
+    });
+  }
+
+  onPageChange(page: number) {
+    this.page = page;
+    this.cargarEntradas();
   }
 
   searchProducts() {
@@ -123,7 +167,7 @@ export class EntradasProductosComponent implements OnInit, OnDestroy {
       return;
     }
 
-    const { unidad, almacen, cantidad } = this.formEntrada.value;
+    const { unidad, almacen, cantidad, motivo } = this.formEntrada.value;
     // Buscar el registro product_warehouse correspondiente
     const warehouse = (this.productoSeleccionado.warehouses || []).find((w: any) => w.unit.id == unidad && w.warehouse.id == almacen);
     if (!warehouse) {
@@ -137,14 +181,17 @@ export class EntradasProductosComponent implements OnInit, OnDestroy {
     const unidadNombre = warehouse.unit.name;
     const almacenNombre = warehouse.warehouse.name;
     const productoNombre = this.productoSeleccionado.title;
-    const nuevoStock = (warehouse.quantity || 0) + Number(cantidad);
 
-    // Actualizar el stock
-    this.productWarehousesService.updateProductWarehouse(warehouse.id, {
-      unit_id: unidad,
-      warehouse_id: almacen,
-      quantity: nuevoStock
-    }).subscribe({
+    // Registrar la entrada usando el endpoint correcto
+    const data = {
+      product_warehouse_id: warehouse.id,
+      quantity: Number(cantidad),
+      user_id: this.authService.user?.id || null,
+      reason: motivo || null
+    };
+
+    this.isLoading = true;
+    this.productWarehousesService.registrarEntrada(data).subscribe({
       next: (response: any) => {
         this.ngZone.run(() => {
           // Limpiar el formulario después de añadir
@@ -155,9 +202,13 @@ export class EntradasProductosComponent implements OnInit, OnDestroy {
           this.almacenes = [];
           this.unidades = [];
 
-          // Mostrar mensaje de éxito usando el título guardado
+          // Recargar el historial de entradas
+          this.cargarEntradas();
+
+          // Mostrar mensaje de éxito
           this.mensaje = `✅ <b>${cantidad}</b> ${unidadNombre} de <b>${productoNombre}</b> añadidos al almacén <b>${almacenNombre}</b> correctamente.`;
           this.tipoMensaje = 'success';
+          this.isLoading = false;
           this.cdr.detectChanges();
 
           // Hacer scroll al mensaje
@@ -168,23 +219,18 @@ export class EntradasProductosComponent implements OnInit, OnDestroy {
             }
           }, 100);
 
-          // Ocultar el mensaje después de 4 segundos con animación
+          // Ocultar el mensaje después de 4 segundos
           setTimeout(() => {
-            const mensajeDiv = document.getElementById('mensaje-entrada');
-            if (mensajeDiv) {
-              mensajeDiv.classList.remove('show');
-              setTimeout(() => {
-                this.mensaje = '';
-                this.cdr.detectChanges();
-              }, 300); // Esperar a que termine la animación
-            }
+            this.mensaje = '';
+            this.cdr.detectChanges();
           }, 4000);
         });
       },
       error: (error: any) => {
-        console.error('Error al actualizar stock:', error);
-        this.mensaje = error.error?.message || 'Error al actualizar el stock. Por favor, intenta de nuevo.';
+        console.error('Error al registrar entrada:', error);
+        this.mensaje = error.error?.message || 'Error al registrar la entrada. Por favor, intenta de nuevo.';
         this.tipoMensaje = 'danger';
+        this.isLoading = false;
         this.cdr.detectChanges();
       }
     });

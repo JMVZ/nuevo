@@ -137,6 +137,23 @@
                                     <input type="text" (keyup.enter)="searchClients()" [(ngModel)]="phone" name="phone" class="form-control mb-2" placeholder="Telefono" />
                                 </div>
                             </div>
+                            <div class="row mt-3">
+                                <div class="col-6">
+                                    <label class="form-label required">Asesor Responsable</label>
+                                    <select
+                                        class="form-control form-select-solid fw-bolder"
+                                        name="user_id"
+                                        [(ngModel)]="user_id"
+                                        placeholder="Seleccionar Asesor"
+                                    >
+                                        <option value="">Seleccionar Asesor</option>
+                                        <ng-container *ngFor="let asesor of asesores">
+                                            <option [value]="asesor.id">{{ asesor.full_name }}</option>
+                                        </ng-container>
+                                    </select>
+                                    <div class="form-text">Seleccione el asesor responsable de esta proforma.</div>
+                                </div>
+                            </div>
                         </div>
                         <!--end::Card header-->
                     </div>
@@ -366,6 +383,11 @@
                         <!--begin::Card body-->
                         <div class="card-body pt-0">
                             <div class="row">
+                                <div class="col-6">
+                                    <label class="form-label">Número de semanas</label>
+                                    <input type="number" [(ngModel)]="weeks" name="weeks" class="form-control mb-2" placeholder="Número de semanas" min="1" />
+                                    <div class="form-text">Número de semanas para el seguimiento del proyecto</div>
+                                </div>
                                 <div class="col-12">
                                     <label class="form-label">Descripción General</label>
                                     <textarea class="form-control form-control-solid" 
@@ -374,10 +396,6 @@
                                               name="description" 
                                               placeholder="Descripción general de la proforma"></textarea>
                                     <div class="form-text">Información adicional o notas importantes sobre la proforma.</div>
-                                </div>
-                                <div class="col-12">
-                                    <input type="number" [(ngModel)]="weeks" name="weeks" class="form-control mb-2" placeholder="Número de semanas" min="1" />
-                                    <small>Número de semanas para el seguimiento del proyecto</small>
                                 </div>
                             </div>
                         </div>

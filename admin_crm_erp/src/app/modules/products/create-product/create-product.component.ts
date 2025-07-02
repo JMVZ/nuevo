@@ -17,7 +17,7 @@ export class CreateProductComponent {
   imagen_previzualiza:any = 'assets/media/svg/files/blank-image.svg';
   description:string = '';
   price_general:number = 0;
-  disponiblidad:string = '';
+  disponiblidad:string = '1';
   tiempo_de_abastecimiento:number = 0;
   min_discount:number = 0;
   max_discount:number = 0;
@@ -94,16 +94,14 @@ export class CreateProductComponent {
 
   addWarehouse(){
     if(!this.almacen_warehouse ||
-      ! this.unit_warehouse  ||
-      ! this.quantity_warehouse
+      ! this.unit_warehouse
     ){
-      this.toast.error("VALIDACIÓN","Necesitas seleccionar un almacen y una unidad, aparte de colocar una cantidad");
+      this.toast.error("VALIDACIÓN","Necesitas seleccionar un almacen y una unidad");
       return;
     }
 
     let UNIT_SELECTED = this.UNITS.find((unit:any) => unit.id == this.unit_warehouse);
     let WAREHOUSE_SELECTED = this.WAREHOUSES.find((wareh:any) => wareh.id == this.almacen_warehouse);
-
 
     let INDEX_WAREHOUSE = this.WAREHOUSES_PRODUCT.findIndex((wh_prod:any) => (wh_prod.unit.id == this.unit_warehouse)
                                                                               && (wh_prod.warehouse.id == this.almacen_warehouse));
@@ -115,7 +113,7 @@ export class CreateProductComponent {
     this.WAREHOUSES_PRODUCT.push({
       unit: UNIT_SELECTED,
       warehouse: WAREHOUSE_SELECTED,
-      quantity: this.quantity_warehouse,
+      quantity: this.quantity_warehouse || 0,
     });
     this.almacen_warehouse = ''
     this.unit_warehouse = ''
@@ -225,6 +223,12 @@ export class CreateProductComponent {
   store() {
     console.log(this.title,this.description,this.price_general,this.imagen_product,
       this.product_categorie_id,this.sku,this.tax_selected,this.weight,this.width,this.height,this.length);
+    
+    // Establecer valores por defecto si están vacíos
+    if (!this.disponiblidad) this.disponiblidad = '1';
+    if (!this.umbral_unit_id) this.umbral_unit_id = '';
+    if (!this.tax_selected) this.tax_selected = '1';
+    
     if(!this.title ||
       !this.description ||
       !this.price_general ||
@@ -253,15 +257,15 @@ export class CreateProductComponent {
     formData.append("product_categorie_id",this.product_categorie_id);
     formData.append("product_imagen",this.imagen_product)
     formData.append("price_general",this.price_general+"");
-    formData.append("disponiblidad",this.disponiblidad+"");
+    formData.append("disponiblidad",this.disponiblidad);
     formData.append("tiempo_de_abastecimiento",this.tiempo_de_abastecimiento+"");
     formData.append("is_discount",this.is_discount+"");//NUEVO
     formData.append("min_discount",this.min_discount+"");
     formData.append("max_discount",this.max_discount+"");
-    formData.append("tax_selected",this.tax_selected+"");//NUEVO
+    formData.append("tax_selected",this.tax_selected);//NUEVO
     formData.append("importe_iva",this.importe_iva+"");//NUEVO
 
-    formData.append("sku",this.sku+"");
+    formData.append("sku",this.sku);
     formData.append("is_gift",this.is_gift+"");
 
     formData.append("weight",this.weight+"");//NUEVO
@@ -275,15 +279,23 @@ export class CreateProductComponent {
     formData.append("WAREHOUSES_PRODUCT",JSON.stringify(this.WAREHOUSES_PRODUCT));
     formData.append("WALLETS_PRODUCT",JSON.stringify(this.WALLETS_PRODUCT));
     
+    console.log("FormData preparado:", {
+      title: this.title,
+      warehouses: this.WAREHOUSES_PRODUCT,
+      wallets: this.WALLETS_PRODUCT
+    });
 
     this.productService.registerProduct(formData).subscribe((resp:any) => {
-      console.log(resp);
+      console.log("Respuesta del servidor:", resp);
       if(resp.message == 200){
         this.toast.success("EXITO","El producto se registro correctamente");
         this.cleanForm();
       }else{
-        this.toast.warning("VALIDACIÓN",resp.message_text);
+        this.toast.error("ERROR", resp.message_text || "Error al crear el producto");
       }
+    }, (error) => {
+      console.error("Error completo:", error);
+      this.toast.error("ERROR", "Error de conexión: " + (error.error?.message_text || error.message));
     })
   }
 

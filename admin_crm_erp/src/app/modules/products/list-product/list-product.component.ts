@@ -5,6 +5,7 @@ import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { isPermission, URL_SERVICIOS } from 'src/app/config/config';
 import { ImportProductsComponent } from '../import-products/import-products.component';
 import { ChangeDetectorRef } from '@angular/core';
+import { HttpHeaders, HttpClient } from '@angular/common/http';
 
 @Component({
   selector: 'app-list-product',
@@ -48,7 +49,8 @@ export class ListProductComponent {
   constructor(
     public modalService: NgbModal,
     public productService: ProductsService,
-    private cdr: ChangeDetectorRef
+    private cdr: ChangeDetectorRef,
+    private http: HttpClient
   ) {
     
   }
@@ -60,7 +62,6 @@ export class ListProductComponent {
     this.listProducts();
     this.configAll();
     this.productosFiltrados = this.PRODUCTS;
-    this.calcularNumProductsBajo();
   }
 
   listProducts(page = 1){
@@ -235,22 +236,198 @@ export class ListProductComponent {
     link.setAttribute('download', 'productos_descargados.xlsx');
     
     // Realizar la petición con el token
-    fetch(link.href, {
+    this.http.get(link.href, {
       headers: {
         'Authorization': 'Bearer ' + this.productService.authservice.token
-      }
+      },
+      responseType: 'blob'
     })
-    .then(response => response.blob())
-    .then(blob => {
+    .subscribe(blob => {
       const url = window.URL.createObjectURL(blob);
       link.href = url;
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
       window.URL.revokeObjectURL(url);
-    })
-    .catch(error => {
+    }, error => {
       console.error('Error al descargar el archivo:', error);
+    });
+  }
+
+  printProducts(){
+    // Obtener todos los productos para impresión
+    this.productService.getAllProducts().subscribe((resp: any) => {
+      const allProducts = resp.products ? resp.products.data : resp.data || [];
+      
+      // Crear el contenido HTML para imprimir
+      let printContent = `
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <title>Listado de Productos</title>
+          <style>
+            @page {
+              size: A4 portrait;
+              margin: 1cm;
+            }
+            body {
+              font-family: Arial, sans-serif;
+              font-size: 12px;
+              line-height: 1.4;
+              margin: 0;
+              padding: 0;
+            }
+            .header {
+              text-align: center;
+              margin-bottom: 20px;
+              border-bottom: 2px solid #333;
+              padding-bottom: 10px;
+            }
+            .header h1 {
+              margin: 0;
+              font-size: 18px;
+              color: #333;
+            }
+            .header p {
+              margin: 5px 0;
+              color: #666;
+            }
+            table {
+              width: 100%;
+              border-collapse: collapse;
+              margin-top: 10px;
+            }
+            th, td {
+              border: 1px solid #ddd;
+              padding: 8px;
+              text-align: left;
+              vertical-align: top;
+            }
+            th {
+              background-color: #f5f5f5;
+              font-weight: bold;
+              font-size: 11px;
+            }
+            td {
+              font-size: 10px;
+            }
+            .product-name {
+              font-weight: bold;
+              color: #333;
+            }
+            .category {
+              color: #666;
+              font-style: italic;
+            }
+            .stock {
+              text-align: center;
+              font-weight: bold;
+            }
+            .stock.low {
+              color: #ff6b6b;
+            }
+            .stock.medium {
+              color: #ffa726;
+            }
+            .stock.high {
+              color: #4caf50;
+            }
+            .footer {
+              margin-top: 20px;
+              text-align: center;
+              font-size: 10px;
+              color: #666;
+              border-top: 1px solid #ddd;
+              padding-top: 10px;
+            }
+            @media print {
+              body { margin: 0; }
+              .no-print { display: none; }
+            }
+          </style>
+        </head>
+        <body>
+          <div class="header">
+            <h1>LISTADO DE PRODUCTOS</h1>
+            <p>Fecha de impresión: ${new Date().toLocaleDateString('es-ES', { 
+              year: 'numeric', 
+              month: 'long', 
+              day: 'numeric',
+              hour: '2-digit',
+              minute: '2-digit'
+            })}</p>
+          </div>
+          
+          <table>
+            <thead>
+              <tr>
+                <th style="width: 60%">Nombre y Descripción</th>
+                <th style="width: 15%">Cantidad</th>
+                <th style="width: 25%">Categoría</th>
+              </tr>
+            </thead>
+            <tbody>
+      `;
+
+      // Agregar los productos a la tabla
+      allProducts.forEach((product: any) => {
+        // Calcular stock total
+        let totalStock = 0;
+        if (product.warehouses && product.warehouses.length > 0) {
+          totalStock = product.warehouses.reduce((sum: number, warehouse: any) => sum + (warehouse.stock || 0), 0);
+        }
+
+        // Determinar clase de stock
+        let stockClass = 'stock';
+        if (totalStock === 0) {
+          stockClass += ' low';
+        } else if (totalStock < 10) {
+          stockClass += ' medium';
+        } else {
+          stockClass += ' high';
+        }
+
+        // Crear nombre completo con descripción
+        let fullName = product.title;
+        if (product.description) {
+          fullName += ' - ' + product.description;
+        }
+
+        printContent += `
+          <tr>
+            <td class="product-name">${fullName}</td>
+            <td class="${stockClass}">${totalStock}</td>
+            <td class="category">${product.product_categorie ? product.product_categorie.name : '---'}</td>
+          </tr>
+        `;
+      });
+
+      printContent += `
+            </tbody>
+          </table>
+          
+          <div class="footer">
+            <p>Total de productos: ${allProducts.length}</p>
+            <p>Sistema de Gestión de Inventario - ${new Date().getFullYear()}</p>
+          </div>
+        </body>
+        </html>
+      `;
+
+      // Abrir ventana de impresión
+      const printWindow = window.open('', '_blank', 'width=800,height=600');
+      if (printWindow) {
+        printWindow.document.write(printContent);
+        printWindow.document.close();
+        
+        // Esperar a que se cargue el contenido y luego imprimir
+        printWindow.onload = () => {
+          setTimeout(() => {
+            printWindow.print();
+            printWindow.close();
+          }, 250);
+        };
+      }
     });
   }
 
@@ -339,69 +516,59 @@ export class ListProductComponent {
               const producto = resp.product;
               console.log(`Detalles del producto ${productId}:`, producto);
               
-              let stock = 0;
+              let stockDisponible = 0;
               if (producto.warehouses && producto.warehouses.length > 0) {
                 console.log(`Almacenes del producto ${productId}:`, producto.warehouses);
-                stock = producto.warehouses.reduce((acc: number, w: any) => {
+                stockDisponible = producto.warehouses.reduce((acc: number, w: any) => {
                   const cantidad = parseFloat(w.quantity) || 0;
-                  console.log(`Stock en almacén ${w.warehouse_id}: ${cantidad}`);
+                  console.log(`Cantidad en almacén para producto ${productId}:`, cantidad);
                   return acc + cantidad;
                 }, 0);
               }
+
+              const cantidadRequerida = requeridosPorProducto[productId];
+              const diferencia = stockDisponible - cantidadRequerida;
               
-              console.log(`Stock total producto ${productId}:`, stock);
-              console.log('Requerido:', requeridosPorProducto[productId]);
-              
-              // Agregar a insumos negativos si hay faltante
-              if (stock < requeridosPorProducto[productId]) {
+              console.log(`Producto ${productId}:`);
+              console.log(`- Stock disponible: ${stockDisponible}`);
+              console.log(`- Cantidad requerida: ${cantidadRequerida}`);
+              console.log(`- Diferencia: ${diferencia}`);
+
+              // Un insumo será negativo si el stock disponible es menor que lo requerido
+              if (diferencia < 0) {
+                console.log(`Producto ${productId} tendrá stock negativo: ${diferencia}`);
                 this.insumosNegativos.push({
+                  productId,
                   nombre: producto.title,
-                  stock: stock,
-                  requerido: requeridosPorProducto[productId],
-                  diferencia: requeridosPorProducto[productId] - stock
+                  stockDisponible,
+                  cantidadRequerida,
+                  diferencia,
+                  producto: producto
                 });
               }
-              
+
               resolve();
             });
           });
         };
 
         // Procesar todos los productos requeridos
-        const procesarTodosLosProductos = async () => {
-          const productIds = Object.keys(requeridosPorProducto);
-          for (const productId of productIds) {
+        const procesarTodos = async () => {
+          for (const productId in requeridosPorProducto) {
             await procesarProducto(productId);
           }
-          console.log('Insumos negativos:', this.insumosNegativos);
-          this.cdr.detectChanges();
         };
 
-        procesarTodosLosProductos();
+        procesarTodos().then(() => {
+          console.log('Cálculo de insumos negativos completado');
+          console.log('Insumos negativos:', this.insumosNegativos);
+        }).catch((error) => {
+          console.error('Error al calcular insumos negativos:', error);
+        });
       },
       error: (error) => {
         console.error('Error al obtener proformas:', error);
       }
-    });
-  }
-
-  calcularNumProductsBajo() {
-    this.num_products_bajo = this.PRODUCTS.filter((prod: any) => {
-      let stock = 0;
-      if (prod.warehouses && prod.warehouses.length > 0) {
-        stock = prod.warehouses.reduce((acc: number, w: any) => acc + (w.quantity || 0), 0);
-      }
-      return stock <= 5;
-    }).length;
-  }
-
-  selectBajo() {
-    this.productosFiltrados = this.PRODUCTS.filter((prod: any) => {
-      let stock = 0;
-      if (prod.warehouses && prod.warehouses.length > 0) {
-        stock = prod.warehouses.reduce((acc: number, w: any) => acc + (w.quantity || 0), 0);
-      }
-      return stock <= 5;
     });
   }
 }

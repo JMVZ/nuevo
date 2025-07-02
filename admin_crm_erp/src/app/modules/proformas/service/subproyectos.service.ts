@@ -105,6 +105,14 @@ export class SubproyectosService {
       );
   }
 
+  updateProduct(subproyecto_id: number, producto_id: number, data: any): Observable<any> {
+    this.isLoadingSubject.next(true);
+    const url = `${URL_SERVICIOS}/subproyectos/${subproyecto_id}/productos/${producto_id}`;
+    return this.http.put(url, data, { headers: this.getHeaders() }).pipe(
+      finalize(() => this.isLoadingSubject.next(false))
+    );
+  }
+
   removeProduct(subproyecto_id: number, producto_id: number): Observable<any> {
     this.isLoadingSubject.next(true);
     const url = `${URL_SERVICIOS}/subproyectos/${subproyecto_id}/productos/${producto_id}`;

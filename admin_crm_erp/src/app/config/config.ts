@@ -306,3 +306,29 @@ export function isPermission(permission:string){
   }
   return false;
 }
+
+export function isSuperAdmin(): boolean {
+  let USER_AUTH = JSON.parse(localStorage.getItem("user") ?? '{}')
+  if(USER_AUTH && USER_AUTH.role_name){
+    return USER_AUTH.role_name === 'Super-Admin';
+  }
+  return false;
+}
+
+export function setInventoryProtection(enabled: boolean): void {
+  localStorage.setItem('inventory_security_mode', JSON.stringify(enabled));
+}
+
+export function getInventoryProtection(): boolean {
+  const protection = localStorage.getItem('inventory_security_mode');
+  return protection ? JSON.parse(protection) : false; // Por defecto desactivado
+}
+
+export function isInventoryProtectionEnabled(): boolean {
+  // Solo funciona si está activada Y el usuario no es Super-Admin
+  // Los Super-Admin siempre pueden editar independientemente de la protección
+  const protectionEnabled = getInventoryProtection();
+  const userIsSuperAdmin = isSuperAdmin();
+  
+  return protectionEnabled && !userIsSuperAdmin;
+}

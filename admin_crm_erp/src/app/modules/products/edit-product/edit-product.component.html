@@ -448,6 +448,8 @@
                                     <!--end::Card header-->
                                     <!--begin::Card body-->
                                     <div class="card-body pt-0" *ngIf="isPermission('show_existencia_product')">
+                                        
+
                                         <!--begin::Input group-->
                                         <div class="mb-10 fv-row row">
                                             <div class="col-6">
@@ -542,21 +544,87 @@
                                                 <!--end::Label-->
                                                 <!--begin::Input-->
                                                 <div class="d-flex gap-3">
-                                                    <input type="number" [(ngModel)]="quantity_warehouse" name="quantity_warehouse" class="form-control mb-2" placeholder="On shelf" />
+                                                    <input type="number" [(ngModel)]="quantity_warehouse" name="quantity_warehouse" class="form-control mb-2" placeholder="Cantidad inicial" />
                                                 </div>
                                                 <!--end::Input-->
                                                 <!--begin::Description-->
-                                                <div class="text-muted fs-7">Enter the product quantity.</div>
+                                                <div class="text-warning fs-7">⚠️ Solo se puede establecer cantidad inicial</div>
                                                 <!--end::Description-->
                                             </div>
                                             <div class="col-1">
                                                 <label class="required form-label">Agregar</label>
-                                                <button class="btn btn-primary btn-sm" (click)="addWarehouse()">+</button>
+                                                <button class="btn btn-primary btn-sm" (click)="addWarehouse()" title="Añadir nueva unidad/almacén">+</button>
                                             </div>
                                         </div>
-                                        <!--end::Input group-->
-                                        <div class="mb-10 fv-row row">
+                                                                <!--end::Input group-->
+                                        
+                                        
+
+                        <!--begin::Panel de Control de Seguridad (siempre visible)-->
+                        <div class="mb-10 fv-row row">
+                            <div class="col-12">
+                                <div class="card" [ngClass]="isSuperAdmin() ? 'bg-light-success' : 'bg-light-info'">
+                                    <div class="card-body p-5">
+                                        <div class="d-flex align-items-center justify-content-between">
+                                            <div>
+                                                <h4 class="mb-2" [ngClass]="isSuperAdmin() ? 'text-success' : 'text-info'">
+                                                    <span *ngIf="isSuperAdmin()">🛡️ Control de Seguridad de Inventario (Administrador)</span>
+                                                    <span *ngIf="!isSuperAdmin()">📋 Estado de Seguridad de Inventario</span>
+                                                </h4>
+                                                <p class="text-muted mb-0">
+                                                    <span *ngIf="inventoryProtectionEnabled">
+                                                        🔒 <strong>Estado:</strong> Modo Seguro ACTIVADO
+                                                    </span>
+                                                    <span *ngIf="!inventoryProtectionEnabled">
+                                                        🔓 <strong>Estado:</strong> Modo Normal ACTIVADO
+                                                    </span>
+                                                </p>
+                                                <small class="text-muted">
+                                                    <span *ngIf="!isSuperAdmin()">Solo el Administrador puede cambiar este modo</span>
+                                                    <span *ngIf="isSuperAdmin()">Configure el nivel de seguridad para las operaciones de inventario</span>
+                                                </small>
+                                            </div>
+                                            <div>
+                                                <button 
+                                                    class="btn btn-sm" 
+                                                    [ngClass]="inventoryProtectionEnabled ? 'btn-success' : 'btn-warning'"
+                                                    [disabled]="!isSuperAdmin()"
+                                                    (click)="toggleInventoryProtection()"
+                                                    [title]="!isSuperAdmin() ? 'Solo el Administrador puede cambiar este modo' : 'Cambiar modo de seguridad'">
+                                                    <span *ngIf="inventoryProtectionEnabled">🔒 Modo Seguro</span>
+                                                    <span *ngIf="!inventoryProtectionEnabled">🔓 Modo Normal</span>
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <!--end::Panel de Control de Seguridad-->
+
+                        <div class="mb-10 fv-row row">
                                             <div class="col-12">
+                                                                                <div class="alert alert-warning d-flex align-items-center p-5 mb-5" *ngIf="inventoryProtectionEnabled">
+                                    <i class="ki-duotone ki-shield-check fs-2hx text-warning me-4"><span class="path1"></span><span class="path2"></span><span class="path3"></span></i>
+                                    <div class="d-flex flex-column">
+                                        <h4 class="mb-1 text-warning">🔒 Modo Seguro Activado</h4>
+                                        <span><strong>Políticas de seguridad activas:</strong></span>
+                                        <span>• 🔐 Las cantidades están <strong>protegidas</strong> contra modificaciones directas</span>
+                                        <span>• 📋 Solo se pueden modificar por <strong>Procesos Oficiales de Inventario</strong></span>
+                                        <span>• ✅ Garantiza <strong>trazabilidad completa</strong> de los movimientos</span>
+                                    </div>
+                                </div>
+                                
+                                <div class="alert alert-info d-flex align-items-center p-5 mb-5" *ngIf="!inventoryProtectionEnabled">
+                                    <i class="ki-duotone ki-pencil fs-2hx text-info me-4"><span class="path1"></span><span class="path2"></span></i>
+                                    <div class="d-flex flex-column">
+                                        <h4 class="mb-1 text-info">🔓 Modo Normal Activado</h4>
+                                        <span><strong>Operaciones flexibles:</strong></span>
+                                        <span>• ✏️ Se pueden <strong>editar</strong> las cantidades libremente</span>
+                                        <span>• 🗑️ Se pueden <strong>eliminar</strong> registros de inventario</span>
+                                        <span>• ⚡ Mayor agilidad en las operaciones de stock</span>
+                                    </div>
+                                </div>
                                                 <div class="table-responsive">
                                                     <table class="table table-row-bordered table-row-gray-100 align-middle gs-0 gy-3">
                                                        <thead>
@@ -595,13 +663,25 @@
                                                                       {{ WAREHOUSES_PROD.quantity }}
                                                                    </td>
                                                                    <td class="">
+                                                                      <!-- Botones cuando el MODO SEGURO está ACTIVADO -->
+                                                                      <ng-container *ngIf="inventoryProtectionEnabled && !isSuperAdmin()">
+                                                                          <a href="#" onclick="return false" class="btn btn-icon btn-bg-light btn-sm me-1" title="🔒 Operación restringida por modo seguro">
+                                                                              <i class="ki-duotone ki-pencil fs-2 text-muted"><span class="path1"></span><span class="path2"></span></i>
+                                                                          </a>
+                                                                          <a href="#" onclick="return false" class="btn btn-icon btn-bg-light btn-sm" title="🔒 Operación restringida por modo seguro">
+                                                                              <i class="ki-duotone ki-trash fs-2 text-muted"><span class="path1"></span><span class="path2"></span><span class="path3"></span><span class="path4"></span><span class="path5"></span></i>
+                                                                          </a>
+                                                                      </ng-container>
                                                                       
-                                                                      <a href="#" *ngIf="isPermission('edit_existencia_product')" onclick="return false" (click)="editWarehouse(WAREHOUSES_PROD)" class="btn btn-icon btn-bg-light btn-active-color-primary btn-sm me-1">
-                                                                      <i class="ki-duotone ki-pencil fs-2"><span class="path1"></span><span class="path2"></span></i>                                </a>
-                                                       
-                                                                      <a href="#" *ngIf="isPermission('delete_existencia_product')" onclick="return false" (click)="removeWarehouse(WAREHOUSES_PROD)" class="btn btn-icon btn-bg-light btn-active-color-primary btn-sm">
-                                                                      <i class="ki-duotone ki-trash fs-2"><span class="path1"></span><span class="path2"></span><span class="path3"></span><span class="path4"></span><span class="path5"></span></i>                                </a>
-                                                       
+                                                                      <!-- Botones cuando el MODO NORMAL está ACTIVADO o es ADMINISTRADOR -->
+                                                                      <ng-container *ngIf="!inventoryProtectionEnabled || isSuperAdmin()">
+                                                                          <a href="#" *ngIf="isPermission('edit_existencia_product')" onclick="return false" (click)="editWarehouse(WAREHOUSES_PROD)" class="btn btn-icon btn-bg-light btn-active-color-primary btn-sm me-1" title="Editar cantidad">
+                                                                              <i class="ki-duotone ki-pencil fs-2"><span class="path1"></span><span class="path2"></span></i>
+                                                                          </a>
+                                                                          <a href="#" *ngIf="isPermission('delete_existencia_product')" onclick="return false;" (click)="removeWarehouse(WAREHOUSES_PROD)" class="btn btn-icon btn-bg-light btn-active-color-primary btn-sm" title="Eliminar cantidad">
+                                                                              <i class="ki-duotone ki-trash fs-2"><span class="path1"></span><span class="path2"></span><span class="path3"></span><span class="path4"></span><span class="path5"></span></i>
+                                                                          </a>
+                                                                      </ng-container>
                                                                    </td>
                                                                 </tr>
                                                             </ng-container>

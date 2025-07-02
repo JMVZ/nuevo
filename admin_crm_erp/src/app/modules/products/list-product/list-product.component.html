@@ -151,6 +151,10 @@
                     <i class="ki-duotone ki-folder-down fs-2"><span class="path1"></span><span class="path2"></span></i> 
                 </button>
 
+                <button class="btn btn-info btn-sm mx-1" (click)="printProducts()">
+                    <i class="ki-duotone ki-printer fs-2"><span class="path1"></span><span class="path2"></span><span class="path3"></span></i> 
+                </button>
+
                 <button class="btn btn-success btn-sm mx-1" (click)="importProducts()">
                     <i class="ki-duotone ki-update-folder fs-2"><span class="path1"></span><span class="path2"></span></i> 
                 </button>
@@ -175,12 +179,6 @@
                       <span class="fw-bold">Insumos faltantes</span>
                     </button>
                 </div>
-
-                <!-- Botón naranja de stock bajo (si existe la variable) -->
-                <button *ngIf="num_products_bajo > 0" class="btn btn-warning btn-sm mx-1 d-flex align-items-center gap-1" (click)="selectBajo()">
-                  <i class="ki-duotone ki-warning fs-2 text-dark"></i>
-                  <span class="fw-bold text-dark">Stock bajo ({{ num_products_bajo }})</span>
-                </button>
             </div>
             <div class="col-2">
                 <select class="form-select mb-2" [(ngModel)]="product_categorie_id" name="product_categorie_id" data-control="select2" data-hide-search="true" data-placeholder="Select an option">
@@ -338,8 +336,8 @@
         <tbody>
           <tr *ngFor="let insumo of insumosNegativos">
             <td>{{ insumo.nombre }}</td>
-            <td>{{ insumo.stock }}</td>
-            <td>{{ insumo.requerido }}</td>
+            <td>{{ insumo.stockDisponible }}</td>
+            <td>{{ insumo.cantidadRequerida }}</td>
             <td>
               <span class="text-danger fw-bold">
                 <i class="ki-duotone ki-warning fs-2"></i>

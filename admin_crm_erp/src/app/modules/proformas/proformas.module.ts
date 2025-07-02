@@ -20,6 +20,7 @@ import { AlertService } from '../../services/alert.service';
 import { SearchClientsComponent } from './componets/search-clients/search-clients.component';
 import { SubproyectosProformaComponent } from './componets/subproyectos-proforma/subproyectos-proforma.component';
 import { PdfViewerModalComponent } from './componets/pdf-viewer-modal/pdf-viewer-modal.component';
+import { AssignProductionUsersComponent } from './componets/assign-production-users/assign-production-users.component';
 
 // Material Design
 import { MatDialogModule } from '@angular/material/dialog';
@@ -40,7 +41,8 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
     WeeklyProgressComponent,
     SearchClientsComponent,
     SubproyectosProformaComponent,
-    PdfViewerModalComponent
+    PdfViewerModalComponent,
+    AssignProductionUsersComponent
   ],
   imports: [
     CommonModule,

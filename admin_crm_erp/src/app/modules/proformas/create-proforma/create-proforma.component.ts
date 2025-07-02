@@ -27,6 +27,7 @@ export class CreateProformaComponent {
   final_product_title: string = '';
   final_product_description: string = '';
   weeks: number = 0;
+  user_id: string = '';
 
   agencia:string = '';
   full_name_encargado:string = '';
@@ -90,7 +91,6 @@ export class CreateProformaComponent {
     this.user = this.proformaService.authservice.user;
     this.sucursale_asesor = this.user.sucursale_id;
     this.proformaService.configAll().subscribe((resp:any) => {
-      console.log(resp);
       this.client_segments = resp.client_segments;
       this.asesores = resp.asesores;
       this.sucursale_deliveries = resp.sucursale_deliveries;
@@ -255,10 +255,24 @@ export class CreateProformaComponent {
   }
 
   save(){
+    // Validación mejorada del cliente
     if(!this.CLIENT_SELECTED){
       this.toast.error("Error","Debe seleccionar un cliente");
       return;
     }
+
+    if(!this.CLIENT_SELECTED.id){
+      this.toast.error("Error","El cliente seleccionado no tiene un ID válido");
+      return;
+    }
+
+    // Validar que el cliente tenga un segmento asignado
+    if(!this.CLIENT_SELECTED.client_segment_id){
+      this.toast.error("Error","El cliente seleccionado no tiene un segmento asignado");
+      return;
+    }
+
+    // Validar los demás campos requeridos
     if(this.SUBPROYECTOS_DATA.length == 0){
       this.toast.error("Error","Debe agregar al menos un subproyecto");
       return;
@@ -283,89 +297,145 @@ export class CreateProformaComponent {
       this.toast.error("Error","Debe ingresar un número válido de semanas");
       return;
     }
-
-    // Verificar que el cliente tenga un segmento válido
-    if(!this.CLIENT_SELECTED.client_segment_id){
-      this.toast.error("Error","El cliente no tiene un segmento asignado");
+    if(!this.user_id){
+      this.toast.error("Error","Debe seleccionar un asesor responsable");
       return;
     }
 
-    const formData = new FormData();
-    formData.append("client_id",this.CLIENT_SELECTED.id);
-    formData.append("client_segment_id",this.CLIENT_SELECTED.client_segment_id.toString());
-    
-    // Usar precio global si está activado
-    const totalToUse = this.usar_precio_global && this.precio_global > 0 ? this.precio_global : this.TOTAL_PROFORMA;
-    
-    formData.append("subtotal",totalToUse.toString());
-    formData.append("total",totalToUse.toString());
-    formData.append("igv",this.TOTAL_IMPUESTO_PROFORMA.toString());
-    formData.append("debt",totalToUse.toString());
-    formData.append("paid_out",this.PAID_OUT_PROFORMA.toString());
-    formData.append("SUBPROYECTOS_DATA",JSON.stringify(this.SUBPROYECTOS_DATA));
-    formData.append("DETAIL_PROFORMAS",JSON.stringify([]));
-    formData.append("usar_precio_global", this.usar_precio_global.toString());
-    if(this.usar_precio_global) {
-      formData.append("precio_global", this.precio_global.toString());
+    try {
+      // Log de datos para depuración
+      console.log('Cliente seleccionado:', this.CLIENT_SELECTED);
+      console.log('ID del cliente:', this.CLIENT_SELECTED.id);
+      console.log('Subproyectos:', this.SUBPROYECTOS_DATA);
+
+      const formData = new FormData();
+      
+      // Datos del cliente
+      formData.append("client_id", this.CLIENT_SELECTED.id.toString());
+      formData.append("client_segment_id", this.CLIENT_SELECTED.client_segment_id.toString());
+      
+      // Usar precio global si está activado
+      const totalToUse = this.usar_precio_global && this.precio_global > 0 ? this.precio_global : this.TOTAL_PROFORMA;
+      
+      // Datos financieros
+      formData.append("subtotal", totalToUse.toString());
+      formData.append("total", totalToUse.toString());
+      formData.append("igv", this.TOTAL_IMPUESTO_PROFORMA.toString());
+      formData.append("debt", totalToUse.toString());
+      formData.append("paid_out", this.PAID_OUT_PROFORMA.toString());
+      
+      // Datos de subproyectos y detalles
+      formData.append("SUBPROYECTOS_DATA", JSON.stringify(this.SUBPROYECTOS_DATA));
+      formData.append("DETAIL_PROFORMAS", JSON.stringify([]));
+      
+      // Configuración de precio global
+      formData.append("usar_precio_global", this.usar_precio_global.toString());
+      if(this.usar_precio_global) {
+        formData.append("precio_global", this.precio_global.toString());
+      }
+      
+      // Datos de entrega
+      formData.append("sucursale_deliverie_id", this.sucursale_deliverie_id.toString());
+      formData.append("date_entrega", this.date_entrega);
+      formData.append("address", this.address || '');
+      
+      // Datos de ubicación
+      formData.append("ubigeo_region", this.ubigeo_region || '');
+      formData.append("ubigeo_provincia", this.ubigeo_provincia || '');
+      formData.append("ubigeo_distrito", this.ubigeo_distrito || '');
+      formData.append("region", this.region || '');
+      formData.append("provincia", this.provincia || '');
+      formData.append("distrito", this.distrito || '');
+      
+      // Datos de agencia
+      formData.append("agencia", this.agencia || '');
+      formData.append("full_name_encargado", this.full_name_encargado || '');
+      formData.append("documento_encargado", this.documento_encargado || '');
+      formData.append("telefono_encargado", this.telefono_encargado || '');
+      
+      // Datos del producto
+      formData.append("description", this.description || '');
+      formData.append("final_product_title", this.final_product_title);
+      formData.append("final_product_description", this.final_product_description);
+      formData.append("weeks", this.weeks.toString());
+      formData.append("user_id", this.user_id);
+
+      // Datos de pago
+      if(this.method_payment_id){
+        formData.append("method_payment_id", this.method_payment_id.toString());
+        formData.append("amount_payment", this.amount_payment.toString());
+        if(this.payment_file){
+          formData.append("payment_file", this.payment_file);
+        }
+        if(this.banco_id){
+          formData.append("banco_id", this.banco_id.toString());
+        }
+      }
+
+      // Log de los datos que se envían
+      const formDataObj: { [key: string]: any } = {};
+      formData.forEach((value, key) => {
+        formDataObj[key] = value;
+        console.log(`Campo ${key}:`, value);
+      });
+      console.log('Datos completos que se envían:', formDataObj);
+
+      this.proformaService.createProforma(formData).subscribe({
+        next: (resp:any) => {
+          console.log('Respuesta del servidor:', resp);
+          if(resp.message === 200) {
+            this.toast.success("Éxito","La proforma se creó con éxito");
+            this.resetForm();
+          } else {
+            this.toast.error("Error", resp.error || "Hubo un error al crear la proforma");
+          }
+        },
+        error: (err:any) => {
+          console.error('Error al crear proforma:', err);
+          console.error('Detalles del error:', {
+            status: err.status,
+            statusText: err.statusText,
+            error: err.error,
+            message: err.message,
+            requestData: formDataObj
+          });
+          let mensajeError = "Error al crear la proforma";
+          if (err.error?.message) {
+            mensajeError = err.error.message;
+          } else if (err.message) {
+            mensajeError = err.message;
+          }
+          this.toast.error("Error", mensajeError);
+        },
+        complete: () => {
+          this.isLoadingProcess();
+        }
+      });
+    } catch (error) {
+      console.error('Error al preparar los datos:', error);
+      this.toast.error("Error","Hubo un error al preparar los datos de la proforma");
+      this.isLoadingProcess();
     }
-    formData.append("sucursale_deliverie_id",this.sucursale_deliverie_id);
-    formData.append("date_entrega",this.date_entrega);
-    formData.append("address",this.address);
-    formData.append("ubigeo_region",this.ubigeo_region);
-    formData.append("ubigeo_provincia",this.ubigeo_provincia);
-    formData.append("ubigeo_distrito",this.ubigeo_distrito);
-    formData.append("region",this.region);
-    formData.append("provincia",this.provincia);
-    formData.append("distrito",this.distrito);
-    formData.append("agencia",this.agencia);
-    formData.append("full_name_encargado",this.full_name_encargado);
-    formData.append("documento_encargado",this.documento_encargado);
-    formData.append("telefono_encargado",this.telefono_encargado);
-    formData.append("description",this.description);
-    formData.append("final_product_title",this.final_product_title);
-    formData.append("final_product_description",this.final_product_description);
-    formData.append("weeks",this.weeks.toString());
+  }
 
-    if(this.method_payment_id){
-      formData.append("method_payment_id",this.method_payment_id);
-      formData.append("amount_payment",this.amount_payment.toString());
-      if(this.payment_file){
-        formData.append("payment_file",this.payment_file);
-      }
-      if(this.banco_id){
-        formData.append("banco_id",this.banco_id);
-      }
-    }
-
-    this.proformaService.createProforma(formData).subscribe({
-      next: (resp:any) => {
-        console.log('Respuesta del servidor:', resp);
-        this.toast.success("Exito","La proforma se creo con exito");
-
-        this.resetClient();
-        this.SUBPROYECTOS_DATA = [];
-        this.resetSucursaleDeliverie();
-        this.TOTAL_PROFORMA = 0;
-        this.method_payment_id = '';
-        this.amount_payment = 0;
-        this.imagen_previzualiza = '';
-        this.payment_file = null;
-        this.TOTAL_IMPUESTO_PROFORMA = 0;
-        this.DEBT_PROFORMA = 0;
-        this.PAID_OUT_PROFORMA = 0;
-        this.banco_id = '';
-        this.description = '';
-        this.weeks = 0;
-        this.usar_precio_global = false;
-        this.precio_global = 0;
-        this.isLoadingProcess();
-      },
-      error: (err:any) => {
-        console.error('Error al crear proforma:', err);
-        this.toast.error("Error","Hubo un error en el servidor: " + (err.error?.message || err.message || 'Error desconocido'));
-        this.isLoadingProcess();
-      }
-    });
+  private resetForm() {
+    this.resetClient();
+    this.SUBPROYECTOS_DATA = [];
+    this.resetSucursaleDeliverie();
+    this.TOTAL_PROFORMA = 0;
+    this.method_payment_id = '';
+    this.amount_payment = 0;
+    this.imagen_previzualiza = '';
+    this.payment_file = null;
+    this.TOTAL_IMPUESTO_PROFORMA = 0;
+    this.DEBT_PROFORMA = 0;
+    this.PAID_OUT_PROFORMA = 0;
+    this.banco_id = '';
+    this.description = '';
+    this.weeks = 0;
+    this.usar_precio_global = false;
+    this.precio_global = 0;
+    this.user_id = '';
   }
 
   // Agregar método para manejar cambios en subproyectos

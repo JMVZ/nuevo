@@ -21,14 +21,14 @@ export class CreateClientsCompanyComponent {
 
   full_name:string = '';
   client_segment_id:string = '';
-  type_document:string = 'RUC';
-  n_document:number = 0;
+  type_document:string | null = null;
+  n_document:number | null = null;
   origen:string = '';
   sexo:string = '';
   birthdate:any = null;
   phone:number = 0;
   email:string = '';
-  asesor_id:string = '';
+  asesor_id:string | null = null;
 
   REGIONES:any = UBIGEO_REGIONES;
   PROVINCIAS:any = UBIGEO_PROVINCIA;
@@ -91,7 +91,7 @@ export class CreateClientsCompanyComponent {
   }
   store(){
     if(!this.full_name || !this.client_segment_id || 
-      !this.type_document || !this.n_document || !this.origen || !this.birthdate || !this.phone
+      !this.origen || !this.phone
       || !this.ubigeo_region || !this.ubigeo_provincia || !this.ubigeo_distrito
       || !this.address
     ){
@@ -105,13 +105,13 @@ export class CreateClientsCompanyComponent {
     let data = {
       full_name: this.full_name,
       client_segment_id: this.client_segment_id,
-      type_document: this.type_document,
-      n_document: this.n_document,
+      type_document: null,
+      n_document: null,
       origen: this.origen,
-      birthdate: this.birthdate,
+      birthdate: null,
       phone: this.phone,
       email: this.email,
-      asesor_id: this.asesor_id,
+      asesor_id: null,
       ubigeo_region: this.ubigeo_region,
       ubigeo_provincia: this.ubigeo_provincia,
       ubigeo_distrito: this.ubigeo_distrito,

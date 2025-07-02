@@ -25,8 +25,6 @@
           <label>Cantidad a ingresar</label>
           <input type="number" class="form-control" formControlName="cantidad" min="1">
         </div>
-      </div>
-      <div class="row mb-3">
         <div class="col-md-3">
           <label>Unidad</label>
           <select class="form-select" formControlName="unidad">
@@ -36,7 +34,10 @@
             </option>
           </select>
         </div>
-        <div class="col-md-3">
+      </div>
+
+      <div class="row mb-3">
+        <div class="col-md-6">
           <label>Almacén</label>
           <select class="form-select" formControlName="almacen">
             <option value="">Selecciona un almacén</option>
@@ -45,8 +46,20 @@
             </option>
           </select>
         </div>
-        <div class="col-md-6 d-flex align-items-end">
-          <button type="submit" class="btn btn-primary" [disabled]="formEntrada.invalid || isLoading">
+        <div class="col-md-6">
+          <label>Motivo (Opcional)</label>
+          <textarea 
+            class="form-control" 
+            formControlName="motivo" 
+            rows="3"
+            placeholder="Describe el motivo de la entrada..."></textarea>
+          <div class="text-muted fs-7">Ej: Compra, Devolución, Ajuste de inventario, etc.</div>
+        </div>
+      </div>
+
+      <div class="row mb-3">
+        <div class="col-md-12 d-flex justify-content-end">
+          <button type="submit" class="btn btn-success" [disabled]="formEntrada.invalid || isLoading">
             <span *ngIf="isLoading" class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
             Registrar Entrada
           </button>
@@ -54,9 +67,59 @@
       </div>
     </form>
 
-    <div *ngIf="mensaje" id="mensaje-entrada" class="alert mt-3 fade show" [ngClass]="{'alert-success': tipoMensaje==='success', 'alert-danger': tipoMensaje==='danger'}">
+    <div *ngIf="mensaje" id="mensaje-entrada" class="alert mt-3 show" [ngClass]="{'alert-success': tipoMensaje==='success', 'alert-danger': tipoMensaje==='danger'}">
       <span [innerHTML]="mensaje"></span>
-      <button type="button" class="btn-close" (click)="mensaje = ''"></button>
+    </div>
+
+    <!-- Tabla de historial de entradas -->
+    <div class="table-responsive mt-5">
+      <h3>Historial de entradas</h3>
+      <table class="table table-striped">
+        <thead>
+          <tr>
+            <th>Fecha</th>
+            <th>Producto</th>
+            <th>Cantidad</th>
+            <th>Unidad</th>
+            <th>Almacén</th>
+            <th>Motivo</th>
+            <th>Usuario</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let entrada of entradas">
+            <td>{{ entrada.created_at | date:'dd/MM/yyyy HH:mm' }}</td>
+            <td>
+              <div class="d-flex flex-column">
+                <span class="fw-bold">{{ entrada.product_warehouse?.product?.title || 'Sin producto' }}</span>
+                <small class="text-muted">{{ entrada.product_warehouse?.product?.description || '' }}</small>
+              </div>
+            </td>
+            <td>{{ entrada.quantity }}</td>
+            <td>{{ entrada.product_warehouse?.unit?.name || 'Sin unidad' }}</td>
+            <td>{{ entrada.product_warehouse?.warehouse?.name || 'Sin almacén' }}</td>
+            <td>
+              <span *ngIf="entrada.reason" class="text-muted">{{ entrada.reason }}</span>
+              <span *ngIf="!entrada.reason" class="text-muted fst-italic">Sin motivo</span>
+            </td>
+            <td>{{ entrada.user?.name || '-' }}</td>
+          </tr>
+          <tr *ngIf="entradas.length === 0">
+            <td colspan="7" class="text-center">No hay registros de entradas</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Paginación -->
+    <div class="d-flex justify-content-center mt-4" *ngIf="totalItems > pageSize">
+      <ngb-pagination
+        [collectionSize]="totalItems"
+        [(page)]="page"
+        [pageSize]="pageSize"
+        (pageChange)="onPageChange($event)"
+        aria-label="Paginación de entradas">
+      </ngb-pagination>
     </div>
   </div>
 </div> 

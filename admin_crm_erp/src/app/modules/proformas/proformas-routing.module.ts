@@ -11,6 +11,11 @@ const routes: Routes = [
     component: ProformasComponent,
     children: [
       {
+        path: '',
+        redirectTo: 'listado',
+        pathMatch: 'full'
+      },
+      {
         path:'crear',
         component: CreateProformaComponent
       },

@@ -158,9 +158,9 @@
                                     <tr *ngFor="let pdf of pdfs">
                                         <td>{{ pdf.name }}</td>
                                         <td>
-                                            <a [href]="pdf.url" target="_blank" class="btn btn-sm btn-light-primary me-2">
+                                            <button type="button" class="btn btn-sm btn-light-primary me-2" (click)="openPdf(pdf)">
                                                 Ver
-                                            </a>
+                                            </button>
                                             <button type="button" class="btn btn-sm btn-light-danger" (click)="deletePdf(pdf.id)">
                                                 Eliminar
                                             </button>

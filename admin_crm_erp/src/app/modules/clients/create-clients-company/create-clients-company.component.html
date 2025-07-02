@@ -66,91 +66,32 @@
                                         <ng-container *ngFor="let client_segment of client_segments">
                                             <option [value]="client_segment.id">{{ client_segment.name }}</option>
                                         </ng-container>
-                                        
-                                        
                                     </select>
-            
                                 </div>
                             </div>
-                            <div class="fv-row row mb-7">
-                                <div class="col-4">
-                                    <!--begin::Label-->
-                                    <label class="required fw-bold fs-6 mb-2">Tipo de Documento: (*) </label>
-                                    <select
-                                        class="form-control form-select-solid fw-bolder"
-                                        name="type_document"
-                                        [(ngModel)]="type_document"
-                                        placeholder="Selec. Tipo"
-                                    >
-                                        <option value="RUC">RUC</option>
-                                        <option value="RUC 20">RUC 20</option>
-                                    </select>
-            
-                                </div>
-            
-                                <div class="col-6">
-                                    <!--begin::Label-->
-                                    <label class="required fw-bold fs-6 mb-2">N° de RUC: (*) </label>
-                                    <!--end::Label-->
-                                    <!--begin::Input-->
-                                    <input type="number" name="n_document" [(ngModel)]="n_document" class="form-control form-control-solid mb-3 mb-lg-0" placeholder="#00000000" />
-                                    <!--end::Input-->
-                                </div>
-            
-                                
-            
-                            </div>
-            
                             <div class="fv-row row mb-7">
                                 <div class="col-4">
                                     <!--begin::Label-->
                                     <label class="required fw-bold fs-6 mb-2">Origen: (*) </label>
-                                    <select
-                                        class="form-control form-select-solid fw-bolder"
-                                        name="origen"
-                                        [(ngModel)]="origen"
-                                        placeholder="Selec. Tipo"
-                                    >
-                                        <option value="">Ninguno</option>
-                                        <option value="FACEBOOK">FACEBOOK</option>
-                                        <option value="GOOGLE">GOOGLE</option>
-                                        <option value="YOUTUBE">YOUTUBE</option>
-                                        <option value="CORREO">CORREO</option>
-                                        <option value="TIKTOK">TIKTOK</option>
-                                    </select>
-            
-                                </div>
-                                <div class="col-4">
-                                    <!--begin::Label-->
-                                    <label class="required fw-bold fs-6 mb-2">Aniversario: (*) </label>
                                     <!--end::Label-->
-                                    <div class="input-group input-group-solid">
-                                        <input type="date"
-                                        name="birthdate"
-                                        class="form-control form-control-lg form-control-solid"
-                                        [(ngModel)]="birthdate"
-                                        />
-                                    </div>
+                                    <!--begin::Input-->
+                                    <input type="text" name="origen" [(ngModel)]="origen" class="form-control form-control-solid mb-3 mb-lg-0" placeholder="Origen del cliente" />
+                                    <!--end::Input-->
                                 </div>
-            
                                 <div class="col-4">
                                     <!--begin::Label-->
                                     <label class="required fw-bold fs-6 mb-2">Telefono: (*) </label>
-                                    
                                     <!--begin::Input-->
                                     <input type="number" name="phone" [(ngModel)]="phone" class="form-control form-control-solid mb-3 mb-lg-0" placeholder="000-000-000" />
                                     <!--end::Input-->
                                 </div>
-            
                                 <div class="col-4">
                                     <!--begin::Label-->
                                     <label class="required fw-bold fs-6 mb-2">Correo electronico: (Opcional) </label>
-                                    
                                     <!--begin::Input-->
                                     <input type="text" name="email" [(ngModel)]="email" class="form-control form-control-solid mb-3 mb-lg-0" placeholder="example@gmail.com" />
                                     <!--end::Input-->
                                 </div>
-            
                             </div>
                         </div>
                     </div>
@@ -227,22 +168,6 @@
                                         <input class="form-check-input" type="checkbox" (click)="selectedParcial()" />
                                         <label class="form-check-label">No</label>
                                     </div>
-
-                                </div>
-                                <div class="col-4">
-                                    <label class="required fw-bold fs-6 mb-2">Asesores: (Opcional) </label>
-                                    <select
-                                        class="form-control form-select-solid fw-bolder"
-                                        name="asesor_id"
-                                        [(ngModel)]="asesor_id"
-                                        placeholder="Selec. Asesor"
-                                    >
-                                        <option value="">Ninguno</option>
-                                        
-                                        <ng-container *ngFor="let asesor of asesores">
-                                            <option [value]="asesor.id">{{ asesor.full_name }}</option>
-                                         </ng-container>
-                                    </select>
                                 </div>
                             </div>
                         </div>

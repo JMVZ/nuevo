@@ -7,7 +7,7 @@ export const environment = {
   appVersion: 'v8.1.8',
   USERDATA_KEY: 'authf649fc9a5f55',
   isMockEnabled: false,
-  apiUrl: 'http://192.168.100.145:8000/api',
+  apiUrl: 'http://localhost:8000/api',
   appThemeName: 'Metronic',
   appPurchaseUrl: 'https://1.envato.market/EA4JP',
   appHTMLIntegration:
@@ -159,9 +159,9 @@ export const environment = {
       thumbnail: './assets/media/demos/demo20.png',
     },
   },
-  URL_BACKEND: 'http://192.168.100.145:8000/',
-  URL_SERVICIOS: 'http://192.168.100.145:8000/api',
-  appUrl: 'http://192.168.100.145:4200',
+  URL_BACKEND: 'http://localhost:8000/',
+  URL_SERVICIOS: 'http://localhost:8000/api',
+  appUrl: 'http://localhost:4200',
 };
 
 /*

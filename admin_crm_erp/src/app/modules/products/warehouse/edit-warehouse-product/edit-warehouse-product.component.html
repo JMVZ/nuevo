@@ -3,7 +3,11 @@
     <!--begin::Modal header-->
     <div class="modal-header" id="kt_modal_add_user_header">
         <!--begin::Modal title-->
-        <h2 class="fw-bolder">Edit Warehouse Product: {{ WAREHOUSES_PROD.warehouse.name }}</h2>
+        <h2 class="fw-bolder">
+            <span *ngIf="isProtected && !isSuperAdminUser">🔒 Modo Seguro:</span>
+            <span *ngIf="!isProtected || isSuperAdminUser">✏️ Editar Producto:</span>
+            {{ WAREHOUSES_PROD.warehouse.name }}
+        </h2>
         
         <!--end::Modal title-->
         <!--begin::Close-->
@@ -34,7 +38,7 @@
                         <label class="required form-label">Unidad</label>
                         <!--end::Label-->
                         <!--begin::Select2-->
-                        <select class="form-select mb-2" [(ngModel)]="unit_warehouse" name="unit_warehouse" placeholder="Select an option">
+                        <select class="form-select mb-2" [(ngModel)]="unit_warehouse" name="unit_warehouse" placeholder="Select an option" [disabled]="!canEdit()">
                             <ng-container *ngFor="let UNIT of UNITS">
                                 <option [value]="UNIT.id">{{ UNIT.name }}</option>
                             </ng-container>
@@ -49,7 +53,7 @@
                         <label class="required form-label">Almacen</label>
                         <!--end::Label-->
                         <!--begin::Select2-->
-                        <select class="form-select mb-2" [(ngModel)]="almacen_warehouse" name="almacen_warehouse" placeholder="Select an option">
+                        <select class="form-select mb-2" [(ngModel)]="almacen_warehouse" name="almacen_warehouse" placeholder="Select an option" [disabled]="!canEdit()">
                             <ng-container *ngFor="let WAREHOUSE of WAREHOUSES">
                                 <option [value]="WAREHOUSE.id">{{ WAREHOUSE.name }}</option>
                             </ng-container>
@@ -61,15 +65,19 @@
                     </div>
                     <div class="col-3">
                         <!--begin::Label-->
-                        <label class="required form-label">Quantity</label>
+                        <label class="form-label">
+                            <span *ngIf="isProtected && !isSuperAdminUser">Cantidad (Modo Seguro)</span>
+                            <span *ngIf="!isProtected || isSuperAdminUser">Cantidad</span>
+                        </label>
                         <!--end::Label-->
                         <!--begin::Input-->
                         <div class="d-flex gap-3">
-                            <input type="number" [(ngModel)]="quantity_warehouse" name="quantity_warehouse" class="form-control mb-2" placeholder="On shelf" />
+                            <input type="number" [(ngModel)]="quantity_warehouse" name="quantity_warehouse" class="form-control mb-2" placeholder="Cantidad" [readonly]="!canEdit()" [class.text-muted]="!canEdit()" />
                         </div>
                         <!--end::Input-->
                         <!--begin::Description-->
-                        <div class="text-muted fs-7">Enter the product quantity.</div>
+                        <div class="text-warning fs-7" *ngIf="isProtected && !isSuperAdminUser">🔒 Protegido por políticas de seguridad</div>
+                        <div class="text-success fs-7" *ngIf="!isProtected || isSuperAdminUser">✅ Editable</div>
                         <!--end::Description-->
                     </div>
                 </div>
@@ -79,13 +87,35 @@
             <!--begin::Actions-->
             <div class="text-center pt-15">
                 <button type="reset" class="btn btn-light me-3" (click)="modal.dismiss()">Cerrar</button>
-                <button type="button" (click)="store()" class="btn btn-primary" data-kt-users-modal-action="submit">
-                    <span class="indicator-label">Editar</span>
-
-                    <span class="spinner-border spinner-border-sm align-middle ms-2" *ngIf="isLoading | async"></span>
-                    <!-- <span class="indicator-progress">Please wait...
-                    <span class="spinner-border spinner-border-sm align-middle ms-2"></span></span> -->
+                
+                <!-- Botón cuando el modo seguro está activado y no es Administrador -->
+                <button type="button" class="btn btn-secondary" *ngIf="isProtected && !isSuperAdminUser" disabled title="Edición restringida por modo seguro">
+                    <span class="indicator-label">🔒 Editar (Restringido)</span>
                 </button>
+                
+                <!-- Botón cuando el modo normal está activado o es Administrador -->
+                <button type="button" class="btn btn-primary" *ngIf="!isProtected || isSuperAdminUser" (click)="store()">
+                    <span class="indicator-label" *ngIf="isSuperAdminUser && isProtected">🛡️ Editar (Administrador)</span>
+                    <span class="indicator-label" *ngIf="!isProtected">✏️ Editar</span>
+                </button>
+                
+                <!-- Mensaje informativo cuando está en modo seguro -->
+                <div class="text-warning mt-2 fs-7" *ngIf="isProtected && !isSuperAdminUser">
+                    <i class="ki-duotone ki-shield-check fs-3"><span class="path1"></span><span class="path2"></span><span class="path3"></span></i>
+                    <strong>Modo Seguro:</strong> Use Procesos Oficiales de Inventario para cambios trazables
+                </div>
+                
+                <!-- Mensaje informativo cuando está en modo normal -->
+                <div class="text-success mt-2 fs-7" *ngIf="!isProtected">
+                    <i class="ki-duotone ki-pencil fs-3"><span class="path1"></span><span class="path2"></span></i>
+                    <strong>Modo Normal:</strong> Puede editar libremente las cantidades
+                </div>
+                
+                <!-- Mensaje especial para Administrador -->
+                <div class="text-primary mt-2 fs-7" *ngIf="isSuperAdminUser && isProtected">
+                    <i class="ki-duotone ki-crown fs-3"><span class="path1"></span><span class="path2"></span></i>
+                    <strong>Acceso Administrativo:</strong> Puede editar aún en modo seguro
+                </div>
             </div>
             <!--end::Actions-->
         </form>

@@ -21,14 +21,14 @@ export class CreateClientsPersonComponent {
   name:string = '';
   surname:string = '';
   client_segment_id:string = '';
-  type_document:string = '';
-  n_document:number = 0;
+  type_document:string | null = null;
+  n_document:number | null = null;
   origen:string = '';
   sexo:string = '';
   birthdate:any = null;
   phone:number = 0;
   email:string = '';
-  asesor_id:string = '';
+  asesor_id:string | null = null;
   religion:string = 'No especificado';
 
   REGIONES:any = UBIGEO_REGIONES;
@@ -92,8 +92,7 @@ export class CreateClientsPersonComponent {
   }
   store(){
     if(!this.name || !this.surname || !this.client_segment_id || 
-      !this.type_document || !this.n_document || !this.origen || 
-      !this.sexo || !this.birthdate || !this.phone
+      !this.origen || !this.sexo || !this.phone
       || !this.address
     ){
       this.toast.error("Validación","Necesitas llenar todos los campos con la referencia (*)");
@@ -123,14 +122,14 @@ export class CreateClientsPersonComponent {
       surname: this.surname,
       full_name: this.name + ' ' + this.surname,
       client_segment_id: this.client_segment_id,
-      type_document: this.type_document,
-      n_document: this.n_document,
+      type_document: null,
+      n_document: null,
       origen: this.origen,
       sexo: this.sexo,
-      birthdate: this.birthdate,
+      birthdate: null,
       phone: this.phone,
       email: this.email,
-      asesor_id: this.asesor_id,
+      asesor_id: null,
       ubigeo_region: this.ubigeo_region,
       ubigeo_provincia: this.ubigeo_provincia,
       ubigeo_distrito: this.ubigeo_distrito,

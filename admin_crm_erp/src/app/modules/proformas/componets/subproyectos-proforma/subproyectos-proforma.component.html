@@ -5,61 +5,115 @@
   <div class="card-body">
     
     <!-- Lista de Subproyectos Existentes -->
-    <div *ngIf="subproyectos.length > 0" class="mb-4">
+    <div *ngIf="safeSubproyectos.length > 0" class="mb-4">
       <h6>Subproyectos Creados:</h6>
       <div class="row">
-        <div *ngFor="let subproyecto of subproyectos; let i = index" class="col-md-6 mb-3">
+        <div *ngFor="let subproyecto of safeSubproyectos; let i = index; trackBy: trackBySubproyectoId" class="col-md-12 mb-3">
           <div class="card border-primary">
             <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
               <span>{{ subproyecto.nombre }}</span>
               <div>
-                <button class="btn btn-sm btn-light me-2" (click)="editarSubproyecto(i)">
+                <button class="btn btn-sm btn-light me-2" (click)="editarSubproyecto(i)" title="Editar subproyecto">
                   <i class="bi bi-pencil"></i>
                 </button>
-                <button class="btn btn-sm btn-danger" (click)="eliminarSubproyecto(i)">
+                <button class="btn btn-sm btn-success me-2" (click)="agregarInsumoASubproyecto(i)" title="Agregar insumo" *ngIf="isEditMode">
+                  <i class="bi bi-plus-circle"></i>
+                </button>
+                <button class="btn btn-sm btn-danger" (click)="eliminarSubproyecto(i)" title="Eliminar subproyecto">
                   <i class="bi bi-trash"></i>
                 </button>
               </div>
             </div>
             <div class="card-body">
-              <p><strong>Descripción:</strong> {{ subproyecto.descripcion || 'Sin descripción' }}</p>
-              <p><strong>Estado:</strong> 
-                <span class="badge badge-{{subproyecto.estado === 'pendiente' ? 'warning' : subproyecto.estado === 'en_proceso' ? 'info' : 'success'}}">
-                  {{ subproyecto.estado }}
-                </span>
-              </p>
-              <p><strong>Productos:</strong> {{ subproyecto.productos.length }}</p>
+              <div class="row mb-3">
+                <div class="col-md-6">
+                  <p><strong>Descripción:</strong> {{ subproyecto.descripcion || 'Sin descripción' }}</p>
+                </div>
+                <div class="col-md-3">
+                  <p><strong>Estado:</strong> 
+                    <span class="badge badge-{{subproyecto.estado === 'pendiente' ? 'warning' : subproyecto.estado === 'en_proceso' ? 'info' : 'success'}}">
+                      {{ subproyecto.estado }}
+                    </span>
+                  </p>
+                </div>
+                <div class="col-md-3">
+                  <p><strong>Total Insumos:</strong> {{ getSafeSubproyectoProductos(subproyecto).length }}</p>
+                </div>
+              </div>
               
-              <!-- Tabla de productos del subproyecto -->
-              <div *ngIf="subproyecto.productos.length > 0" class="mt-2">
+              <!-- Tabla mejorada de productos del subproyecto -->
+              <div *ngIf="getSafeSubproyectoProductos(subproyecto).length > 0" class="mt-3">
+                <h6 class="mb-3">Insumos del Subproyecto:</h6>
                 <div class="table-responsive">
-                  <table class="table table-sm table-bordered">
-                    <thead class="table-light">
+                  <table class="table table-sm table-bordered table-hover">
+                    <thead class="table-header">
                       <tr>
-                        <th>Producto</th>
-                        <th>Cantidad</th>
-                        <th>Acciones</th>
+                        <th style="width: 40%">Producto</th>
+                        <th style="width: 20%" class="text-center">Cantidad</th>
+                        <th style="width: 20%" class="text-center">Unidad</th>
+                        <th style="width: 20%" class="text-center" *ngIf="isEditMode">Acciones</th>
                       </tr>
                     </thead>
                     <tbody>
-                      <tr *ngFor="let producto of subproyecto.productos; let j = index">
+                      <tr *ngFor="let producto of getSafeSubproyectoProductos(subproyecto); let j = index; trackBy: trackByProductoId">
                         <td>
-                          <small>{{ getProductFullName(producto) }}</small>
+                          <div class="product-info">
+                            <strong>{{ producto.product?.title || 'Producto sin nombre' }}</strong>
+                            <br>
+                            <small class="text-muted">{{ producto.product?.description || '' }}</small>
+                          </div>
                         </td>
                         <td class="text-center">
-                          <small>{{ producto.cantidad || 0 }}</small>
+                          <!-- Edición en línea de cantidad -->
+                          <div *ngIf="isEditMode && editingProduct?.id === producto.id; else showCantidad">
+                            <input type="number" 
+                                   class="form-control form-control-sm text-center simple-input" 
+                                   [(ngModel)]="editingProduct.cantidad" 
+                                   (blur)="saveInsumoEdit(i, j)"
+                                   (keyup.enter)="saveInsumoEdit(i, j)"
+                                   min="0.01" 
+                                   step="0.01">
+                          </div>
+                          <ng-template #showCantidad>
+                            <span class="editable-field" 
+                                  (click)="startEditInsumo(producto, i, j)" 
+                                  [title]="isEditMode ? 'Click para editar' : ''"
+                                  [class.clickable]="isEditMode">
+                              {{ producto.cantidad | number:'1.2-2' }}
+                            </span>
+                          </ng-template>
                         </td>
                         <td class="text-center">
-                          <button class="btn btn-sm btn-danger" 
-                                  (click)="eliminarProductoDeSubproyecto(i, j)"
-                                  title="Eliminar producto">
-                            <i class="bi bi-trash"></i>
-                          </button>
+                          <span class="unit-badge">{{ producto.unit?.name || 'Unidad' }}</span>
+                        </td>
+                        <td class="text-center" *ngIf="isEditMode">
+                          <div class="btn-group-simple" role="group">
+                            <button class="btn btn-sm btn-edit" 
+                                    (click)="editarInsumoDetallado(producto, i, j)"
+                                    title="Editar">
+                              <i class="bi bi-pencil"></i>
+                            </button>
+                            <button class="btn btn-sm btn-delete" 
+                                    (click)="eliminarProductoDeSubproyecto(i, j)"
+                                    title="Eliminar">
+                              <i class="bi bi-trash"></i>
+                            </button>
+                          </div>
                         </td>
                       </tr>
                     </tbody>
+                    
                   </table>
                 </div>
+              </div>
+              
+              <!-- Mensaje cuando no hay insumos -->
+              <div *ngIf="getSafeSubproyectoProductos(subproyecto).length === 0" class="text-center text-muted py-4">
+                <i class="bi bi-box-seam display-4 d-block mb-2"></i>
+                <p>No hay insumos en este subproyecto</p>
+                <button *ngIf="isEditMode" class="btn btn-primary btn-sm" (click)="agregarInsumoASubproyecto(i)">
+                  <i class="bi bi-plus-circle"></i> Agregar Primer Insumo
+                </button>
               </div>
             </div>
           </div>
@@ -96,8 +150,15 @@
           </div>
         </div>
 
-        <!-- Sección de Productos -->
-        <div class="border rounded p-3 mb-3">
+        <!-- Mensaje informativo en modo crear -->
+        <div *ngIf="isCreateMode" class="alert alert-info mb-3">
+          <i class="bi bi-info-circle me-2"></i>
+          <strong>Información:</strong> Los productos solo se pueden agregar a los subproyectos después de crear la proforma. 
+          Una vez creada la proforma, podrás editarla y agregar los productos necesarios a cada subproyecto.
+        </div>
+
+        <!-- Sección de Productos - Solo visible en modo editar -->
+        <div *ngIf="isEditMode" class="border rounded p-3 mb-3">
           <h6 class="mb-3">Agregar Productos al Subproyecto</h6>
           
           <!-- Búsqueda de Producto -->
@@ -127,14 +188,14 @@
               <label class="form-label">Unidad</label>
               <select class="form-select" [(ngModel)]="unidad_product" (change)="changeUnitProduct($event)">
                 <option value="">Seleccione</option>
-                <option *ngFor="let unit of PRODUCT_SELECTED.units" [value]="unit.id">{{ unit.name }}</option>
+                <option *ngFor="let unit of safeProductSelectedUnits; trackBy: trackByUnitId" [value]="unit.id">{{ unit.name }}</option>
               </select>
             </div>
             <div class="col-md-4">
               <label class="form-label">Almacén</label>
               <select class="form-select" [(ngModel)]="selected_warehouse" [disabled]="!unidad_product">
                 <option value="">Seleccione</option>
-                <option *ngFor="let warehouse of exits_warehouse" [value]="warehouse.id">
+                <option *ngFor="let warehouse of safeExitsWarehouse; trackBy: trackByWarehouseId" [value]="warehouse.id">
                   {{ warehouse.warehouse.name }} (Stock: {{ warehouse.stock }})
                 </option>
               </select>
@@ -154,8 +215,8 @@
             </button>
           </div>
 
-          <!-- Lista de Productos en el Subproyecto -->
-          <div *ngIf="nuevoSubproyecto.productos.length > 0">
+          <!-- Lista de Productos en el Subproyecto - Solo visible en modo editar -->
+          <div *ngIf="safeNuevoSubproyectoProductos.length > 0">
             <h6>Productos en el Subproyecto:</h6>
             <div class="table-responsive">
               <table class="table table-sm">
@@ -168,7 +229,7 @@
                   </tr>
                 </thead>
                 <tbody>
-                  <tr *ngFor="let producto of nuevoSubproyecto.productos; let i = index">
+                  <tr *ngFor="let producto of safeNuevoSubproyectoProductos; let i = index; trackBy: trackByProductoId">
                     <td>{{ getProductFullName(producto) }}</td>
                     <td>{{ producto.cantidad || 0 }}</td>
                     <td>{{ producto.unit?.name || 'Unidad' }}</td>
@@ -182,7 +243,7 @@
                 <tfoot>
                   <tr>
                     <th colspan="3" class="text-end">Total Productos:</th>
-                    <th>{{ nuevoSubproyecto.productos.length }}</th>
+                    <th>{{ safeNuevoSubproyectoProductos.length }}</th>
                   </tr>
                 </tfoot>
               </table>
@@ -207,7 +268,7 @@
         <div class="mt-3 p-3 bg-light rounded">
           <div class="row">
             <div class="col-12">
-              <h6>Total de Subproyectos: {{ subproyectos.length }}</h6>
+              <h6>Total de Subproyectos: {{ safeSubproyectos.length }}</h6>
             </div>
           </div>
         </div>
@@ -229,19 +290,17 @@
           <tr>
             <th>Producto</th>
             <th>Unidad</th>
-            <th>Precio</th>
             <th>Acciones</th>
           </tr>
         </thead>
         <tbody>
-          <tr *ngFor="let product of PRODUCTS_FOUND">
+          <tr *ngFor="let product of safeProductsFound; trackBy: trackByProductId">
             <td>
               <strong>{{ product.title }}</strong>
               <br>
               <small class="text-muted">{{ product.description }}</small>
             </td>
             <td>{{ product.units[0]?.name || 'N/A' }}</td>
-            <td>{{ product.price_general | currency }}</td>
             <td>
               <button type="button" class="btn btn-primary btn-sm" (click)="selectProduct(product)">
                 <i class="bi bi-check-lg"></i> Seleccionar
@@ -254,5 +313,66 @@
   </div>
   <div class="modal-footer">
     <button type="button" class="btn btn-secondary" (click)="modalService.dismissAll()">Cancelar</button>
+  </div>
+</ng-template>
+
+<!-- Modal de Edición de Insumo -->
+<ng-template #editarInsumoModal>
+  <div class="modal-header-simple">
+    <h5 class="modal-title">
+      Editar Insumo
+    </h5>
+    <button type="button" class="btn-close" aria-label="Close" (click)="modalService.dismissAll()"></button>
+  </div>
+  <div class="modal-body-simple">
+    <div *ngIf="insumoEditando">
+      <!-- Información del Producto -->
+      <div class="product-info-simple">
+        <h6>{{ insumoEditando.product?.title || 'Producto sin nombre' }}</h6>
+        <p class="text-muted">{{ insumoEditando.product?.description || 'Sin descripción' }}</p>
+        <span class="unit-badge">{{ insumoEditando.unit?.name || 'Unidad' }}</span>
+      </div>
+
+      <!-- Formulario de Edición -->
+      <div class="edit-form-simple">
+        <div class="form-group-simple">
+          <label class="form-label">Cantidad *</label>
+          <div class="input-group">
+            <input type="number" 
+                   class="form-control simple-input" 
+                   [(ngModel)]="insumoEditando.cantidad"
+                   min="0.01" 
+                   step="0.01"
+                   placeholder="0.00">
+            <span class="input-group-text">{{ insumoEditando.unit?.name || 'Unidad' }}</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Información de Stock -->
+      <div class="stock-info-simple" *ngIf="insumoEditando.product?.warehouses">
+        <div class="row">
+          <div class="col-md-6">
+            <strong>Stock Disponible:</strong>
+            {{ getTotalStock(insumoEditando.product) | number:'1.2-2' }}
+          </div>
+          <div class="col-md-6">
+            <strong>Almacenes:</strong>
+            {{ insumoEditando.product.warehouses?.length || 0 }}
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="modal-footer-simple">
+    <button type="button" class="btn btn-cancel" (click)="modalService.dismissAll()">
+      Cancelar
+    </button>
+    <button type="button" 
+            class="btn btn-save" 
+            (click)="guardarInsumoDetallado()"
+            [disabled]="!validarInsumoEditando()">
+      Guardar
+    </button>
   </div>
 </ng-template> 

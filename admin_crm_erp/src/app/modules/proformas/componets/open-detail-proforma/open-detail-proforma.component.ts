@@ -8,6 +8,7 @@ import { DomSanitizer } from '@angular/platform-browser';
 import { MatDialog } from '@angular/material/dialog';
 import { PdfViewerModalComponent } from '../pdf-viewer-modal/pdf-viewer-modal.component';
 import { HttpClient } from '@angular/common/http';
+import { environment } from 'src/environments/environment';
 
 interface Subproyecto {
   id: number;
@@ -74,10 +75,23 @@ export class OpenDetailProformaComponent implements OnInit {
 
     const formData = new FormData();
     formData.append('pdf', this.selectedFile);
-    formData.append('proforma_id', this.PROFORMA.id);
+    formData.append('proforma_id', this.PROFORMA.id.toString());
+
+    console.log('Enviando archivo:', {
+      nombre: this.selectedFile.name,
+      tipo: this.selectedFile.type,
+      tamaño: this.selectedFile.size,
+      proforma_id: this.PROFORMA.id
+    });
+
+    // Verificar el contenido del FormData
+    formData.forEach((value, key) => {
+      console.log(`${key}:`, value);
+    });
 
     this.proformasService.uploadPdf(formData).subscribe({
       next: (resp: any) => {
+        console.log('Respuesta del servidor:', resp);
         this.toast.success('Éxito', 'PDF subido correctamente');
         this.loadPdfs();
         this.selectedFile = null;
@@ -92,7 +106,10 @@ export class OpenDetailProformaComponent implements OnInit {
   loadPdfs() {
     this.proformasService.getPdfs(this.PROFORMA.id).subscribe({
       next: (resp: any) => {
+        console.log('=== RESPUESTA DE PDFS ===');
+        console.log('Respuesta completa:', resp);
         this.pdfs = resp.pdfs;
+        console.log('PDFs cargados:', this.pdfs);
       },
       error: (error) => {
         this.toast.error('Error', 'Error al cargar los PDFs');
@@ -102,95 +119,49 @@ export class OpenDetailProformaComponent implements OnInit {
 
   openPdf(pdf: any) {
     console.log('=== INICIO openPdf ===');
-    console.log('PDF recibido:', {
-      objeto_completo: pdf,
-      nombre_archivo: pdf?.file_name,
-      url: pdf?.url,
-      path: pdf?.path
-    });
+    console.log('PDF recibido completo:', JSON.stringify(pdf, null, 2));
+    console.log('Environment URL_BACKEND:', environment.URL_BACKEND);
     
     try {
-      // Verificar que el objeto pdf y file_name existan
-      if (!pdf || !pdf.file_name) {
-        console.error('Datos del PDF inválidos:', pdf);
-        throw new Error('Datos del PDF inválidos');
+      let fileName = '';
+      
+      // Obtener el nombre del archivo
+      if (pdf.name) {
+        fileName = pdf.name;
+      } else if (pdf.file_name) {
+        fileName = pdf.file_name;
+      } else if (pdf.path) {
+        // Extraer el nombre del archivo de la ruta
+        fileName = pdf.path.split('/').pop();
+      } else {
+        throw new Error('No se encontró el nombre del archivo PDF');
       }
-
-      // Construir la URL directa al PDF usando la URL del API
-      const url = `https://api-crm.mogancontrol.com/storage/proformas/${encodeURIComponent(pdf.file_name)}`;
-      console.log('Información de la URL:', {
-        url_completa: url,
-        url_base: 'https://api-crm.mogancontrol.com',
-        nombre_archivo_original: pdf.file_name,
-        nombre_archivo_codificado: encodeURIComponent(pdf.file_name)
-      });
-
-      // Verificar si la URL es accesible
-      fetch(url, { 
-        method: 'HEAD',
-        headers: {
-          'Accept': 'application/pdf',
-          'Cache-Control': 'no-cache'
+      
+      console.log('Nombre del archivo extraído:', fileName);
+      
+      // Usar la ruta de la API que maneja caracteres especiales correctamente
+      console.log('Obteniendo PDF vía API con autenticación...');
+      
+      // Hacer petición directa con autenticación
+      this.proformasService.viewPdf(fileName).subscribe({
+        next: (response: Blob) => {
+          // Si la respuesta es exitosa, crear un blob y abrirlo
+          const blob = new Blob([response], { type: 'application/pdf' });
+          const blobUrl = window.URL.createObjectURL(blob);
+          window.open(blobUrl, '_blank');
+        },
+        error: (error: any) => {
+          console.error('Error al abrir PDF:', error);
+          this.toast.error('Error al abrir el PDF', 'Por favor, intente nuevamente');
         }
-      })
-        .then(response => {
-          const headers: Record<string, string> = {};
-          response.headers.forEach((value, key) => {
-            headers[key] = value;
-          });
-          console.log('Respuesta del servidor:', {
-            status: response.status,
-            statusText: response.statusText,
-            headers,
-            url: response.url,
-            redirected: response.redirected,
-            type: response.type
-          });
-
-          if (response.ok) {
-            // Si la respuesta es exitosa, abrir el PDF
-            const link = document.createElement('a');
-            link.href = url;
-            link.target = '_blank';
-            link.rel = 'noopener noreferrer';
-            
-            console.log('Abriendo PDF con:', {
-              href: link.href,
-              target: link.target,
-              rel: link.rel
-            });
-            
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-          } else {
-            console.error('Error al acceder al PDF:', {
-              status: response.status,
-              statusText: response.statusText,
-              url: response.url,
-              redirected: response.redirected
-            });
-            this.toast.error('Error al abrir el PDF', 'El archivo no está disponible');
-          }
-        })
-        .catch((error: Error) => {
-          console.error('Error al verificar URL:', {
-            error: error.message,
-            url: url
-          });
-          this.toast.error('Error al abrir el PDF', 'No se pudo acceder al archivo');
-        });
-
+      });
+      
     } catch (error: unknown) {
       const errorMessage = error instanceof Error ? error.message : 'Error desconocido';
-      const errorStack = error instanceof Error ? error.stack : 'No hay stack trace';
-      console.error('Error detallado al abrir el PDF:', {
-        mensaje: errorMessage,
-        stack: errorStack,
-        pdf_original: pdf
-      });
+      console.error('Error al abrir el PDF:', errorMessage);
       this.toast.error('Error al abrir el PDF', 'Por favor, intente nuevamente');
     }
+    
     console.log('=== FIN openPdf ===');
   }
 

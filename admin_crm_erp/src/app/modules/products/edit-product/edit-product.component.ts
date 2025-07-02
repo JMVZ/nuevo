@@ -9,7 +9,8 @@ import { DeleteWarehouseProductComponent } from '../warehouse/delete-warehouse-p
 import { ProductWalletsService } from '../service/product-wallets.service';
 import { EditWalletPriceProductComponent } from '../wallet/edit-wallet-price-product/edit-wallet-price-product.component';
 import { DeleteWalletPriceProductComponent } from '../wallet/delete-wallet-price-product/delete-wallet-price-product.component';
-import { isPermission } from 'src/app/config/config';
+import { isPermission, isSuperAdmin, setInventoryProtection, getInventoryProtection, isInventoryProtectionEnabled } from 'src/app/config/config';
+import { AlertService } from 'src/app/services/alert.service';
 
 @Component({
   selector: 'app-edit-product',
@@ -20,6 +21,10 @@ export class EditProductComponent {
 
   is_discount:number = 1;
   tab_selected:number = 1;
+
+  // Variables para protección de inventario
+  inventoryProtectionEnabled: boolean = false;
+  isSuperAdminUser: boolean = false;
 
   title:string = '';
   imagen_product:any;
@@ -80,6 +85,7 @@ export class EditProductComponent {
     public productWarehouseService: ProductWarehousesService,
     public productWalletService: ProductWalletsService,
     public modalService: NgbModal,
+    public alertService: AlertService,
   ) {
     
   }
@@ -92,6 +98,10 @@ export class EditProductComponent {
       this.PRODUCT_ID = resp.id;
     })
     this.isLoading$ = this.productService.isLoading$;
+    
+    // Inicializar configuración de protección de inventario
+    this.isSuperAdminUser = isSuperAdmin();
+    this.inventoryProtectionEnabled = getInventoryProtection();
 
     this.productService.showProduct(this.PRODUCT_ID).subscribe((resp:any) => {
       console.log(resp);
@@ -139,16 +149,14 @@ export class EditProductComponent {
 
   addWarehouse(){
     if(!this.almacen_warehouse ||
-      ! this.unit_warehouse  ||
-      ! this.quantity_warehouse
+      ! this.unit_warehouse
     ){
-      this.toast.error("VALIDACIÓN","Necesitas seleccionar un almacen y una unidad, aparte de colocar una cantidad");
+      this.toast.error("VALIDACIÓN","Necesitas seleccionar un almacen y una unidad");
       return;
     }
 
     let UNIT_SELECTED = this.UNITS.find((unit:any) => unit.id == this.unit_warehouse);
     let WAREHOUSE_SELECTED = this.WAREHOUSES.find((wareh:any) => wareh.id == this.almacen_warehouse);
-
 
     let INDEX_WAREHOUSE = this.WAREHOUSES_PRODUCT.findIndex((wh_prod:any) => (wh_prod.unit.id == this.unit_warehouse)
                                                                               && (wh_prod.warehouse.id == this.almacen_warehouse));
@@ -161,20 +169,35 @@ export class EditProductComponent {
       product_id: this.PRODUCT_ID,
       unit_id: this.unit_warehouse,
       warehouse_id: this.almacen_warehouse,
-      quantity : this.quantity_warehouse,
+      quantity: this.quantity_warehouse || 0,
     }
     this.productWarehouseService.registerProductWarehouse(data).subscribe((resp:any) => {
       this.WAREHOUSES_PRODUCT.push(resp.product_warehouse);
+      
+      // 🔔 NOTIFICACIÓN AL ADMIN - Solo si la protección está activada
+      if (this.inventoryProtectionEnabled) {
+        const alertMessage = `🔒 NUEVA CANTIDAD INICIAL REGISTRADA CON PROTECCIÓN
+        
+        ➤ Producto: ${this.title}
+        ➤ Almacén: ${WAREHOUSE_SELECTED.name}
+        ➤ Unidad: ${UNIT_SELECTED.name} 
+        ➤ Cantidad: ${this.quantity_warehouse || 0}
+        ➤ Usuario: ${localStorage.getItem('user_name') || 'Sistema'}
+        ➤ Fecha: ${new Date().toLocaleString()}
+        
+        🛡️ MODO SEGURO ACTIVADO:
+        • ❌ NO se puede editar directamente
+        • ❌ NO se puede eliminar
+        • ✅ Solo modificable por Movimientos de Inventario oficiales`;
+        
+        this.alertService.warning(alertMessage);
+      }
+      
       this.almacen_warehouse = ''
       this.unit_warehouse = ''
       this.quantity_warehouse = 0
       this.toast.success("EXITO","La existencia de este producto se agrego correctamente");
       this.isLoadingProcess();
-      // {
-      //   unit: UNIT_SELECTED,
-      //   warehouse: WAREHOUSE_SELECTED,
-      //   quantity: this.quantity_warehouse,
-      // }
     })
     console.log(this.WAREHOUSES_PRODUCT);
   }
@@ -432,4 +455,31 @@ export class EditProductComponent {
   isPermission(permission:string){
     return isPermission(permission);
   }
+
+  // Métodos para protección de inventario
+  toggleInventoryProtection() {
+    if (!this.isSuperAdminUser) {
+      this.toast.error("ACCESO DENEGADO", "Solo el Super-Admin puede modificar el modo de seguridad");
+      return;
+    }
+    
+    this.inventoryProtectionEnabled = !this.inventoryProtectionEnabled;
+    setInventoryProtection(this.inventoryProtectionEnabled);
+    
+    const message = this.inventoryProtectionEnabled 
+      ? "🔒 Modo Seguro ACTIVADO" 
+      : "🔓 Modo Seguro DESACTIVADO";
+    
+    this.toast.success("CONFIGURACIÓN ACTUALIZADA", message);
+  }
+
+  isSuperAdmin(): boolean {
+    return isSuperAdmin();
+  }
+
+  isProtectionActive(): boolean {
+    return isInventoryProtectionEnabled();
+  }
+
+
 }

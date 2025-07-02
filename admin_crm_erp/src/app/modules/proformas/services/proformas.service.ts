@@ -13,4 +13,13 @@ export class ProformasService {
   getProformaInventoryItems(proformaId: number): Observable<any> {
     return this.http.get(`${this.baseUrl}/proformas/${proformaId}/inventory-items`);
   }
+
+  createProforma(formData: FormData): Observable<any> {
+    return this.http.post(`${this.baseUrl}/proformas`, formData, {
+      headers: {
+        'Accept': 'application/json',
+        'X-Requested-With': 'XMLHttpRequest'
+      }
+    });
+  }
 } 

@@ -2,7 +2,11 @@
     <!--begin::Modal header-->
     <div class="modal-header" id="kt_modal_add_user_header">
         <!--begin::Modal title-->
-        <h2 class="fw-bolder">Delete Warehouse Product: #{{ WAREHOUSES_PROD.warehouse.name }}</h2>
+        <h2 class="fw-bolder">
+            <span *ngIf="isProtected && !isSuperAdminUser">🔒 Operación Restringida:</span>
+            <span *ngIf="!isProtected || isSuperAdminUser">🗑️ Eliminar Producto:</span>
+            {{ WAREHOUSES_PROD.warehouse.name }}
+        </h2>
         
         <!--end::Modal title-->
         <!--begin::Close-->
@@ -23,14 +27,54 @@
     <div class="modal-body scroll-y mx-5 mx-xl-15 my-7">
         <!--begin::Form-->
         <form id="kt_modal_add_user_form" class="form" action="#">
-            <p>
-                ¿ESTAS SEGURO DE ELIMINAR ESTE ALMACEN DEL PRODUCTO?
-            </p>
+            <!-- Mensaje cuando está en modo seguro -->
+            <div *ngIf="isProtected && !isSuperAdminUser" class="alert alert-warning d-flex align-items-center p-5 mb-5">
+                <i class="ki-duotone ki-shield-check fs-2hx text-warning me-4"><span class="path1"></span><span class="path2"></span><span class="path3"></span></i>
+                <div class="d-flex flex-column">
+                    <h4 class="mb-1 text-warning">🔒 Operación Restringida</h4>
+                    <span><strong>El modo seguro está activado</strong></span>
+                    <span>• ❌ No se puede eliminar esta cantidad directamente</span>
+                    <span>• 🛡️ Solo el Administrador puede realizar esta acción</span>
+                    <span>• 📊 Use Procesos Oficiales de Inventario para cambios trazables</span>
+                </div>
+            </div>
+            
+            <!-- Mensaje cuando está en modo normal -->
+            <div *ngIf="!isProtected">
+                <p class="text-warning fs-5">
+                    <i class="ki-duotone ki-warning fs-3 text-warning me-2"><span class="path1"></span><span class="path2"></span></i>
+                    ¿ESTÁS SEGURO DE ELIMINAR ESTE ALMACÉN DEL PRODUCTO?
+                </p>
+                <p class="text-muted">Esta acción no se puede deshacer.</p>
+            </div>
+            
+            <!-- Mensaje especial para Administrador -->
+            <div *ngIf="isSuperAdminUser && isProtected">
+                <div class="alert alert-primary d-flex align-items-center p-5 mb-5">
+                    <i class="ki-duotone ki-crown fs-2hx text-primary me-4"><span class="path1"></span><span class="path2"></span></i>
+                    <div class="d-flex flex-column">
+                        <h4 class="mb-1 text-primary">🛡️ Acceso Administrativo</h4>
+                        <span>Puede eliminar aún en modo seguro</span>
+                    </div>
+                </div>
+                <p class="text-warning fs-5">
+                    <i class="ki-duotone ki-warning fs-3 text-warning me-2"><span class="path1"></span><span class="path2"></span></i>
+                    ¿ESTÁS SEGURO DE ELIMINAR ESTE ALMACÉN DEL PRODUCTO?
+                </p>
+            </div>
+            
             <div class="text-center pt-15">
                 <button type="reset" class="btn btn-light me-3" (click)="modal.dismiss()">Cerrar</button>
-                <button type="button" (click)="delete()" class="btn btn-danger" data-kt-users-modal-action="submit">
-                    <span class="indicator-label">ELIMINAR</span>
-
+                
+                <!-- Botón deshabilitado cuando está en modo seguro -->
+                <button type="button" class="btn btn-secondary" *ngIf="isProtected && !isSuperAdminUser" disabled title="Operación restringida por modo seguro">
+                    <span class="indicator-label">🔒 Operación Restringida</span>
+                </button>
+                
+                <!-- Botón habilitado cuando está en modo normal o es Administrador -->
+                <button type="button" (click)="delete()" class="btn btn-danger" *ngIf="!isProtected || isSuperAdminUser" data-kt-users-modal-action="submit">
+                    <span class="indicator-label" *ngIf="isSuperAdminUser && isProtected">🛡️ ELIMINAR (Administrador)</span>
+                    <span class="indicator-label" *ngIf="!isProtected">🗑️ ELIMINAR</span>
                     <span class="spinner-border spinner-border-sm align-middle ms-2" *ngIf="isLoading | async"></span>
                 </button>
             </div>

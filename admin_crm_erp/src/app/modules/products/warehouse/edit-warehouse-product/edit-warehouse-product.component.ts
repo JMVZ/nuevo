@@ -2,6 +2,7 @@ import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
 import { ToastrService } from 'ngx-toastr';
 import { ProductWarehousesService } from '../../service/product-warehouses.service';
+import { isSuperAdmin, isInventoryProtectionEnabled } from 'src/app/config/config';
 
 @Component({
   selector: 'app-edit-warehouse-product',
@@ -17,6 +18,8 @@ export class EditWarehouseProductComponent {
   @Input() WAREHOUSES:any = [];
 
   isLoading:any;
+  isProtected: boolean = false;
+  isSuperAdminUser: boolean = false;
 
   unit_warehouse:string = '';
   almacen_warehouse:string = '';
@@ -36,9 +39,18 @@ export class EditWarehouseProductComponent {
     this.unit_warehouse = this.WAREHOUSES_PROD.unit.id;
     this.almacen_warehouse = this.WAREHOUSES_PROD.warehouse.id;
     this.quantity_warehouse = this.WAREHOUSES_PROD.quantity;
+    
+    // Verificar modo de seguridad de inventario
+    this.isSuperAdminUser = isSuperAdmin();
+    this.isProtected = isInventoryProtectionEnabled();
   }
 
   store(){
+    // Verificar si está en modo seguro y el usuario no es Administrador
+    if (this.isProtected && !this.isSuperAdminUser) {
+      this.toast.error("ACCESO RESTRINGIDO", "🔒 Modo seguro activado. Solo el Administrador puede modificar cantidades.");
+      return;
+    }
 
     let data = {
       unit_id: this.unit_warehouse,
@@ -56,6 +68,11 @@ export class EditWarehouseProductComponent {
         this.modal.close();
       }
     })
+  }
+
+  // Método helper para usar en el template
+  canEdit(): boolean {
+    return !this.isProtected || this.isSuperAdminUser;
   }
 
 

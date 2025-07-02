@@ -29,9 +29,26 @@ export class ProductsService {
 
   registerProduct(data:any) {
     this.isLoadingSubject.next(true);
-    let headers = new HttpHeaders({'Authorization': 'Bearer '+ this.authservice.token});
+    
+    // IMPORTANTE: NO establecer Content-Type para FormData
+    // Dejar que Angular lo configure automáticamente
+    let headers = new HttpHeaders();
+    if (this.authservice.token) {
+      headers = headers.set('Authorization', 'Bearer ' + this.authservice.token);
+    }
+    
     let URL = URL_SERVICIOS+"/products";
+    
     return this.http.post(URL,data,{headers: headers}).pipe(
+      tap((response: any) => {
+        console.log('Respuesta exitosa:', response);
+      }),
+      catchError((error: any) => {
+        console.error('Error en la petición:', error);
+        console.error('Status:', error.status);
+        console.error('Error body:', error.error);
+        return throwError(() => error);
+      }),
       finalize(() => this.isLoadingSubject.next(false))
     );
   }

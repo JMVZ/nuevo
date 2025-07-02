@@ -52,7 +52,7 @@
                     </div>
                   </td>
                   <td>
-                    {{ item.producto_nombre }}
+                    {{ item.producto_nombre }} - {{ item.producto_descripcion }}
                     <div *ngIf="item.stock_info && item.stock_info.stocks_por_almacen && item.stock_info.stocks_por_almacen.length > 1" class="small text-muted">
                       <i class="bi bi-info-circle"></i> Stock en otros almacenes:
                       <span *ngFor="let almacen of item.stock_info.stocks_por_almacen; let i = index">
@@ -92,9 +92,17 @@
 
 <div class="modal-footer">
   <button type="button" class="btn btn-secondary" (click)="close()">Cancelar</button>
+  
+  <button type="button" class="btn btn-success me-2" 
+          [disabled]="!getTakenItems().length || loading"
+          (click)="debugSalidaInsumosHTML()"
+          title="Imprimir orden de salida de insumos">
+    <i class="bi bi-printer"></i> Imprimir Orden Insumos
+  </button>
+  
   <button type="button" class="btn btn-primary" 
           [disabled]="!getSelectedItems().length || loading"
           (click)="takeSelectedItems()">
-    Tomar Productos Seleccionados
+    <i class="bi bi-box-arrow-down"></i> Tomar Productos Seleccionados
   </button>
 </div> 

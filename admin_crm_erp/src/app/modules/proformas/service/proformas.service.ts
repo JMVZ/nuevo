@@ -1,4 +1,4 @@
-import { HttpClient, HttpHeaders, HttpInterceptor, HttpRequest, HttpHandler, HttpEvent } from '@angular/common/http';
+import { HttpClient, HttpHeaders, HttpInterceptor, HttpRequest, HttpHandler, HttpEvent, HttpErrorResponse } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable, BehaviorSubject, finalize, tap, catchError, throwError, map, mergeMap, of } from 'rxjs';
 import { AuthService } from '../../auth';
@@ -212,11 +212,60 @@ export class ProformasService {
     );
   }
 
-  createProforma(data:any){
+  createProforma(data: FormData) {
     this.isLoadingSubject.next(true);
-    let URL = URL_SERVICIOS+"/proformas";
-    let headers = new HttpHeaders({'Authorization': 'Bearer '+this.authservice.token});
-    return this.http.post(URL,data,{headers:headers}).pipe(
+    
+    // Log de los datos recibidos
+    console.log('Datos recibidos en el servicio:', data);
+    
+    // Convertir FormData a objeto JSON
+    const jsonData: { [key: string]: any } = {};
+    data.forEach((value, key) => {
+      if (key === 'SUBPROYECTOS_DATA' || key === 'DETAIL_PROFORMAS') {
+        try {
+          // Si ya es un objeto, usarlo directamente
+          if (typeof value === 'object') {
+            jsonData[key] = value;
+          } else {
+            // Si es string, intentar parsearlo
+            jsonData[key] = JSON.parse(value.toString());
+          }
+        } catch (e) {
+          console.error(`Error al procesar ${key}:`, e);
+          jsonData[key] = value;
+        }
+      } else {
+        jsonData[key] = value;
+      }
+    });
+    
+    // Asegurarse de que client_id sea string
+    if (jsonData.client_id) {
+      jsonData.client_id = jsonData.client_id.toString();
+    }
+    
+    console.log('Datos que se enviarán al servidor:', jsonData);
+    
+    return this.http.post(URL_SERVICIOS + "/proformas", jsonData, {
+      headers: new HttpHeaders({
+        'Authorization': 'Bearer ' + this.authservice.token,
+        'Accept': 'application/json',
+        'Content-Type': 'application/json'
+      }),
+      withCredentials: false
+    }).pipe(
+      tap(response => {
+        console.log('Respuesta del servidor:', response);
+      }),
+      catchError(error => {
+        console.error('Error en la petición:', error);
+        console.error('Datos enviados:', jsonData);
+        if (error.status === 0) {
+          console.error('Error de conexión - El servidor no está respondiendo');
+          return throwError(() => new Error('No se pudo conectar con el servidor. Por favor, verifica que el servidor esté en ejecución.'));
+        }
+        return throwError(() => error);
+      }),
       finalize(() => this.isLoadingSubject.next(false))
     );
   }
@@ -288,6 +337,12 @@ export class ProformasService {
     console.log('URL:', URL);
     console.log('Headers:', headers);
     
+    // Asegurarse de que el FormData tenga el contenido correcto
+    console.log('Contenido del FormData:');
+    formData.forEach((value, key) => {
+      console.log(`${key}:`, value);
+    });
+    
     return this.http.post<PdfUploadResponse>(URL, formData, {
       headers: headers,
       reportProgress: true,
@@ -348,6 +403,17 @@ export class ProformasService {
       'Accept': 'application/json'
     });
     return this.http.get(URL, {headers: headers}).pipe(
+      finalize(() => this.isLoadingSubject.next(false))
+    );
+  }
+
+  viewPdf(fileName: string) {
+    this.isLoadingSubject.next(true);
+    let URL = URL_SERVICIOS+"/proformas/view-pdf/"+fileName;
+    let headers = new HttpHeaders({
+      'Authorization': 'Bearer '+this.authservice.token
+    });
+    return this.http.get(URL, {headers: headers, responseType: 'blob'}).pipe(
       finalize(() => this.isLoadingSubject.next(false))
     );
   }
@@ -421,70 +487,20 @@ export class ProformasService {
     });
   }
 
-  getProformaInventoryItems(proformaId: number) {
-    console.log('Servicio: getProformaInventoryItems llamado con ID:', proformaId);
+  getProformaInventoryItems(proformaId: number): Observable<any> {
     this.isLoadingSubject.next(true);
-    let URL = URL_SERVICIOS+"/proformas/"+proformaId+"/inventory-items";
-    console.log('Servicio: URL construida:', URL);
-    console.log('Servicio: Token:', this.authservice.token ? 'Token presente' : 'Sin token');
-    console.log('Servicio: URL_SERVICIOS:', URL_SERVICIOS);
-    
-    let headers = new HttpHeaders({'Authorization': 'Bearer '+this.authservice.token});
-    
-    return this.http.get(URL,{headers:headers}).pipe(
-      map((response: any) => {
-        console.log('Servicio: Respuesta raw del servidor:', response);
-        console.log('Servicio: Tipo de respuesta:', typeof response);
-        console.log('Servicio: Es array?:', Array.isArray(response));
-        
-        if (!response) {
-          console.error('Servicio: No se recibió respuesta del servidor');
-          return {
-            success: false,
-            message: 'No se recibió respuesta del servidor',
-            items: {}
-          };
-        }
-
-        // Si la respuesta es un array, es probable que sea un error del backend
-        if (Array.isArray(response)) {
-          console.error('Servicio: La respuesta es un array vacío, posible error del backend');
-          return {
-            success: false,
-            message: 'La respuesta del servidor no tiene el formato esperado',
-            items: {}
-          };
-        }
-
-        // Asegurar que la respuesta tenga la estructura correcta
-        const processedResponse = {
-          success: response.success || false,
-          message: response.message || '',
-          items: response.items || {}
-        };
-
-        console.log('Servicio: Respuesta procesada:', processedResponse);
-        return processedResponse;
+    return this.http.get(`${URL_SERVICIOS}/proformas/${proformaId}/inventory-items`, {
+      headers: this.getHeaders(),
+      withCredentials: false
+    }).pipe(
+      tap(response => {
+        console.log('Respuesta del servidor:', response);
       }),
       catchError(error => {
-        console.error('Servicio: Error al obtener items del inventario:', {
-          error: error,
-          status: error?.status,
-          statusText: error?.statusText,
-          message: error?.message,
-          url: error?.url,
-          errorBody: error?.error
-        });
-        return of({
-          success: false,
-          message: error.error?.message || 'Error al obtener los items del inventario',
-          items: {}
-        });
+        console.error('Error al obtener items del inventario:', error);
+        return throwError(() => error);
       }),
-      finalize(() => {
-        console.log('Servicio: Finalizando getProformaInventoryItems');
-        this.isLoadingSubject.next(false);
-      })
+      finalize(() => this.isLoadingSubject.next(false))
     );
   }
 
@@ -580,5 +596,76 @@ export class ProformasService {
       }),
       finalize(() => this.isLoadingSubject.next(false))
     );
+  }
+
+  generateSalidaInsumosPDF(proformaId: number): Observable<Blob> {
+    this.isLoadingSubject.next(true);
+    
+    return this.http.get(`${URL_SERVICIOS}/proformas/${proformaId}/salida-insumos-pdf`, {
+      headers: this.getHeaders(),
+      responseType: 'blob',
+      withCredentials: false
+    }).pipe(
+      tap(response => {
+        console.log('PDF generado exitosamente, size:', response.size);
+      }),
+      catchError(error => {
+        console.error('Error al generar PDF:', error);
+        return throwError(() => error);
+      }),
+      finalize(() => this.isLoadingSubject.next(false))
+    );
+  }
+
+  debugSalidaInsumos(proformaId: number): Observable<any> {
+    this.isLoadingSubject.next(true);
+    
+    return this.http.get(`${URL_SERVICIOS}/proformas/${proformaId}/debug-salida-insumos`, {
+      headers: this.getHeaders(),
+      withCredentials: false
+    }).pipe(
+      tap(response => {
+        console.log('Debug completado:', response);
+      }),
+      catchError(error => {
+        console.error('Error en debug:', error);
+        return throwError(() => error);
+      }),
+      finalize(() => this.isLoadingSubject.next(false))
+    );
+  }
+
+  debugSalidaInsumosHTML(proformaId: number): Observable<string> {
+    this.isLoadingSubject.next(true);
+    
+    return this.http.get(`${URL_SERVICIOS}/proformas/${proformaId}/debug-salida-insumos-html`, {
+      headers: this.getHeaders(),
+      responseType: 'text',
+      withCredentials: false
+    }).pipe(
+      tap(response => {
+        console.log('Debug HTML completado, tamaño:', response.length);
+      }),
+      catchError(error => {
+        console.error('Error en debug HTML:', error);
+        return throwError(() => error);
+      }),
+      finalize(() => this.isLoadingSubject.next(false))
+    );
+  }
+
+  private handleError(error: HttpErrorResponse) {
+    console.error('Error en el servicio de proformas:', error);
+    let errorMessage = 'Error desconocido';
+    
+    if (error.error instanceof ErrorEvent) {
+      // Error del lado del cliente
+      errorMessage = `Error: ${error.error.message}`;
+    } else {
+      // Error del lado del servidor
+      errorMessage = error.error?.message || error.message || 'Error en el servidor';
+    }
+    
+    return throwError(() => new Error(errorMessage));
   }
 }

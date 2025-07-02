@@ -1,0 +1,119 @@
+.modal-body {
+  max-height: 70vh;
+  overflow-y: auto;
+}
+
+.card-header {
+  border-bottom: 1px solid #e4e6ef;
+  
+  h5 {
+    color: #181c32;
+    font-weight: 600;
+  }
+}
+
+.table {
+  th {
+    background-color: #f5f8fa;
+    border-bottom: 2px solid #e4e6ef;
+    font-weight: 600;
+    color: #7e8299;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.035em;
+  }
+  
+  td {
+    vertical-align: middle;
+    border-bottom: 1px solid #eff2f5;
+  }
+}
+
+.form-select {
+  &.is-invalid {
+    border-color: #f1416c;
+    box-shadow: 0 0 0 0.2rem rgba(241, 65, 108, 0.25);
+  }
+}
+
+.badge {
+  font-size: 0.75rem;
+  padding: 0.5rem 0.75rem;
+  
+  &.badge-success {
+    background-color: #50cd89;
+    color: #ffffff;
+  }
+  
+  &.badge-warning {
+    background-color: #ffc700;
+    color: #ffffff;
+  }
+  
+  &.badge-light-primary {
+    background-color: #f1faff;
+    color: #009ef7;
+  }
+}
+
+.alert {
+  border: none;
+  border-radius: 0.75rem;
+  
+  &.alert-info {
+    background-color: #f1faff;
+    color: #009ef7;
+  }
+  
+  &.alert-warning {
+    background-color: #fff8dd;
+    color: #f1bc00;
+  }
+  
+  &.alert-success {
+    background-color: #e8fff3;
+    color: #50cd89;
+  }
+}
+
+.spinner-border {
+  width: 3rem;
+  height: 3rem;
+}
+
+.bg-light-primary {
+  background-color: #f1faff !important;
+}
+
+.invalid-feedback {
+  font-size: 0.75rem;
+  margin-top: 0.25rem;
+}
+
+// Animaciones suaves
+.card {
+  transition: all 0.15s ease-in-out;
+  
+  &:hover {
+    box-shadow: 0 0.5rem 1.5rem 0.5rem rgba(0, 0, 0, 0.075);
+  }
+}
+
+.btn {
+  transition: all 0.15s ease-in-out;
+}
+
+// Responsive
+@media (max-width: 768px) {
+  .modal-body {
+    max-height: 60vh;
+  }
+  
+  .table-responsive {
+    font-size: 0.875rem;
+  }
+  
+  .card-header h5 {
+    font-size: 1rem;
+  }
+} 

@@ -1,20 +1,379 @@
-// Estilos para el componente de subproyectos 
+// Estilos sobrios para subproyectos - Fondo gris, letras negras
 
-.cursor-pointer {
-  cursor: pointer;
+// Variables para colores sobrios
+$color-fondo: #f5f5f5;
+$color-texto: #333333;
+$color-borde: #cccccc;
+$color-hover: #e8e8e8;
+$color-header: #666666;
+
+.editable-field {
+  display: inline-block;
+  padding: 4px 8px;
+  border-radius: 2px;
+  transition: background-color 0.2s ease;
+  min-width: 60px;
+  text-align: center;
+  color: $color-texto;
+  background-color: transparent;
   
-  &:hover {
-    background-color: #f8f9fa;
+  &.clickable {
+    cursor: pointer;
+    
+    &:hover {
+      background-color: $color-hover;
+      border: 1px solid $color-borde;
+    }
   }
 }
 
-// Estilo para las badges en el modal
-.badge {
-  &.badge-success {
-    background-color: #28a745;
+.product-info {
+  .text-muted {
+    font-size: 0.85em;
+    line-height: 1.2;
+    color: #666666;
+  }
+}
+
+// Tablas con estilo sobrio
+.table {
+  background-color: white;
+  border: 1px solid $color-borde;
+  
+  .table-header th {
+    background-color: $color-fondo;
+    border-color: $color-borde;
+    color: $color-texto;
+    font-weight: 600;
+    font-size: 0.9em;
+    padding: 12px 8px;
   }
   
-  &.badge-danger {
-    background-color: #dc3545;
+  tbody tr {
+    background-color: white;
+    transition: background-color 0.2s ease;
+    
+    &:hover {
+      background-color: #fafafa;
+    }
+    
+    td {
+      padding: 10px 8px;
+      border-color: $color-borde;
+      color: $color-texto;
+    }
   }
+}
+
+// Cards con estilo sobrio
+.card {
+  background-color: white;
+  border: 1px solid $color-borde;
+  box-shadow: none;
+  
+  .card-header {
+    background-color: $color-fondo;
+    border-bottom: 1px solid $color-borde;
+    color: $color-texto;
+    
+    .btn {
+      background-color: transparent;
+      border: 1px solid $color-borde;
+      color: $color-texto;
+      padding: 4px 8px;
+      margin: 0 2px;
+      
+      &:hover {
+        background-color: $color-hover;
+      }
+      
+      &.btn-success {
+        background-color: #666666;
+        border-color: #666666;
+        color: white;
+        
+        &:hover {
+          background-color: #555555;
+        }
+      }
+      
+      &.btn-danger {
+        background-color: #666666;
+        border-color: #666666;
+        color: white;
+        
+        &:hover {
+          background-color: #555555;
+        }
+      }
+    }
+  }
+  
+  .card-body {
+    background-color: white;
+    color: $color-texto;
+  }
+}
+
+// Badge simple para unidades
+.unit-badge {
+  background-color: $color-fondo;
+  color: $color-texto;
+  padding: 4px 8px;
+  border-radius: 2px;
+  font-size: 0.8em;
+  border: 1px solid $color-borde;
+}
+
+// Botones simples
+.btn-group-simple {
+  .btn {
+    background-color: transparent;
+    border: 1px solid $color-borde;
+    color: $color-texto;
+    padding: 4px 8px;
+    margin: 0 2px;
+    
+    &:hover {
+      background-color: $color-hover;
+    }
+    
+    &.btn-edit:hover {
+      background-color: #e0e0e0;
+    }
+    
+    &.btn-delete:hover {
+      background-color: #e0e0e0;
+    }
+  }
+}
+
+// Inputs simples
+.simple-input {
+  border: 1px solid $color-borde;
+  background-color: white;
+  color: $color-texto;
+  
+  &:focus {
+    border-color: #999999;
+    box-shadow: none;
+    background-color: white;
+  }
+}
+
+// Modal con estilo sobrio
+.modal-header-simple {
+  background-color: $color-fondo;
+  border-bottom: 1px solid $color-borde;
+  color: $color-texto;
+  padding: 15px 20px;
+  
+  .modal-title {
+    font-weight: 600;
+    color: $color-texto;
+  }
+  
+  .btn-close {
+    background-color: transparent;
+    border: none;
+    color: $color-texto;
+  }
+}
+
+.modal-body-simple {
+  background-color: white;
+  color: $color-texto;
+  padding: 20px;
+  
+  .product-info-simple {
+    background-color: $color-fondo;
+    padding: 15px;
+    border: 1px solid $color-borde;
+    margin-bottom: 20px;
+    
+    h6 {
+      color: $color-texto;
+      margin-bottom: 8px;
+    }
+    
+    .text-muted {
+      color: #666666;
+    }
+  }
+  
+  .edit-form-simple {
+    margin-bottom: 20px;
+    
+    .form-group-simple {
+      margin-bottom: 15px;
+      
+      .form-label {
+        color: $color-texto;
+        font-weight: 600;
+        margin-bottom: 5px;
+      }
+      
+      .input-group-text {
+        background-color: $color-fondo;
+        border-color: $color-borde;
+        color: $color-texto;
+      }
+    }
+  }
+  
+  .stock-info-simple {
+    background-color: $color-fondo;
+    padding: 15px;
+    border: 1px solid $color-borde;
+    color: $color-texto;
+  }
+}
+
+.modal-footer-simple {
+  background-color: $color-fondo;
+  border-top: 1px solid $color-borde;
+  padding: 15px 20px;
+  
+  .btn {
+    padding: 8px 16px;
+    border: 1px solid $color-borde;
+    color: $color-texto;
+    background-color: white;
+    margin: 0 5px;
+    
+    &:hover {
+      background-color: $color-hover;
+    }
+    
+    &.btn-save {
+      background-color: #666666;
+      border-color: #666666;
+      color: white;
+      
+      &:hover {
+        background-color: #555555;
+      }
+    }
+    
+    &.btn-cancel {
+      background-color: white;
+      border-color: $color-borde;
+      color: $color-texto;
+      
+      &:hover {
+        background-color: $color-hover;
+      }
+    }
+  }
+}
+
+// Mensaje cuando no hay insumos
+.text-center.text-muted {
+  color: #666666 !important;
+  
+  .display-4 {
+    color: #cccccc !important;
+  }
+  
+  .btn {
+    background-color: #666666;
+    border-color: #666666;
+    color: white;
+    
+    &:hover {
+      background-color: #555555;
+    }
+  }
+}
+
+// Formulario de subproyecto
+.form-control {
+  border: 1px solid $color-borde;
+  background-color: white;
+  color: $color-texto;
+  
+  &:focus {
+    border-color: #999999;
+    box-shadow: none;
+  }
+}
+
+.form-select {
+  border: 1px solid $color-borde;
+  background-color: white;
+  color: $color-texto;
+  
+  &:focus {
+    border-color: #999999;
+    box-shadow: none;
+  }
+}
+
+// Alert informativo
+.alert-info {
+  background-color: $color-fondo;
+  border: 1px solid $color-borde;
+  color: $color-texto;
+}
+
+// Estados de botones principales
+.btn-primary {
+  background-color: #666666;
+  border-color: #666666;
+  color: white;
+  
+  &:hover {
+    background-color: #555555;
+    border-color: #555555;
+  }
+  
+  &:disabled {
+    background-color: #cccccc;
+    border-color: #cccccc;
+  }
+}
+
+.btn-secondary {
+  background-color: white;
+  border-color: $color-borde;
+  color: $color-texto;
+  
+  &:hover {
+    background-color: $color-hover;
+  }
+}
+
+// Responsive
+@media (max-width: 768px) {
+  .table-responsive {
+    font-size: 0.9em;
+  }
+  
+  .btn-group-simple .btn {
+    padding: 2px 6px;
+    font-size: 0.8em;
+  }
+  
+  .editable-field {
+    min-width: 50px;
+    padding: 2px 6px;
+  }
+}
+
+// Remover colores de estado anteriores
+.text-success, .text-primary, .text-info {
+  color: $color-texto !important;
+}
+
+.bg-light-primary, .bg-light-success, .bg-light-info {
+  background-color: $color-fondo !important;
+}
+
+// Estados de loading sobrios
+.btn[disabled] {
+  opacity: 0.6;
+  cursor: not-allowed;
+  background-color: #cccccc !important;
+  border-color: #cccccc !important;
+  color: #666666 !important;
 } 

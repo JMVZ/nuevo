@@ -125,38 +125,6 @@
                     </app-subproyectos-proforma>
                     <!--end::Subproyectos section-->
 
-                    <!--begin::Precio Global-->
-                    <div class="card card-flush py-4">
-                        <div class="card-header">
-                            <div class="card-title">
-                                <h2>Configuración de Precio</h2>
-                            </div>
-                        </div>
-                        <div class="card-body pt-0">
-                            <div class="form-check form-check-custom form-check-solid mb-3">
-                                <input class="form-check-input" type="checkbox" id="precioGlobalSwitch" [(ngModel)]="usar_precio_global" name="usar_precio_global">
-                                <label class="form-check-label" for="precioGlobalSwitch">Usar precio global</label>
-                                    </div>
-                            <div *ngIf="usar_precio_global" class="mb-3">
-                                <label class="form-label">Precio Global</label>
-                                <input type="number" class="form-control" [(ngModel)]="precio_global" name="precio_global" placeholder="Ingrese el precio global">
-                            </div>
-                            <div class="separator"></div>
-                                    <div class="fw-bold fs-4">
-                                        Total: 
-                                        <span id="kt_ecommerce_edit_order_total_price">
-                                    {{ usar_precio_global && precio_global > 0 ? precio_global : TOTAL_PROFORMA }}
-                                        </span> MXN
-                                        <br>
-                                        Impuesto: {{ TOTAL_IMPUESTO_PROFORMA }} MXN
-                                        <br>
-                                Deuda: {{ (usar_precio_global && precio_global > 0 ? precio_global : DEBT_PROFORMA) - (amount_payment ? amount_payment : 0) }} MXN
-                                        <br>
-                                        Pagado: {{ PAID_OUT_PROFORMA + (amount_payment ? amount_payment : 0) }} MXN
-                                </div>
-                        </div>
-                    </div>
-                    <!--end::Precio Global-->
                     <!--begin::Order details-->
                     <div class="card card-flush py-4">
                         <!--begin::Card header-->
